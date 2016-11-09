@@ -1,3 +1,5 @@
+import preset
+
 TITLE = "Gravity Simulator"
 SIZE = 1000
 DIMENSION = 2
@@ -9,3 +11,4 @@ MAX_PATHS = 1000
 CAMERA_COORD_STEP = 5
 CAMERA_ANGLE_STEP = 1
 CAMERA_ACCELERATION = 1.1
+PRESET = preset.BLANK

@@ -6,7 +6,8 @@ from engine3d import Engine3D
 from util import *
 from config import *
 
-mapping = {
+simulator = None
+keymap = {
     u'\uf700': 'up',
     u'\uf701': 'down',
     u'\uf702': 'left',
@@ -18,11 +19,23 @@ mapping = {
     'a': 'rotate_left',
     'd': 'rotate_right'
 }
-engine = None
-tk = None
+
+
+class Simulator:
+    def __init__(self, preset):
+        self.tk = Tkinter.Tk()
+        self.tk.title(TITLE)
+        self.canvas = Tkinter.Canvas(self.tk, bg="white", width=SIZE, height=SIZE)
+        self.engine = (Engine2D if DIMENSION == 2 else Engine3D)(self.canvas, SIZE, on_key_press)
+        self.tk.bind("<Key>", on_key_press)
+        self.canvas.bind("<Button-1>", on_click)
+        self.canvas.pack()
+        if preset:
+            preset.apply()
 
 
 def on_click(event):
+    engine = simulator.engine
     x = event.x
     y = event.y
     if not engine.animating:
@@ -38,24 +51,19 @@ def on_click(event):
 
 
 def on_key_press(event):
+    engine = simulator.engine
     char = event.char
     if char == ' ':
         engine.animating = not engine.animating
-        tk.title("%s (%s)" % (TITLE, "Simulating" if engine.animating else "Paused"))
+        simulator.tk.title("%s (%s)" % (TITLE, "Simulating" if engine.animating else "Paused"))
         engine.animate()
-    elif char in mapping:
-        getattr(engine.camera, mapping[char])(char)
+    elif char in keymap:
+        getattr(engine.camera, keymap[char])(char)
 
 
 def main():
-    global engine, tk
-    tk = Tkinter.Tk()
-    tk.title(TITLE)
-    canvas = Tkinter.Canvas(tk, bg="white", width=SIZE, height=SIZE)
-    engine = (Engine2D if DIMENSION == 2 else Engine3D)(canvas, SIZE, on_key_press)
-    tk.bind("<Key>", on_key_press)
-    canvas.bind("<Button-1>", on_click)
-    canvas.pack()
+    global simulator
+    simulator = Simulator(PRESET)
     Tkinter.mainloop()
 
 

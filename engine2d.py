@@ -17,7 +17,7 @@ class Circle:
     https://en.wikipedia.org/wiki/Polar_coordinate_system
     """
 
-    def __init__(self, m, pos, v, color, tag, dir_tag, engine):
+    def __init__(self, m, pos, v, color, tag, dir_tag, engine, controlbox):
         self.m = m
         self.pos = pos
         self.prev_pos = np.copy(pos)
@@ -33,7 +33,8 @@ class Circle:
         self.v_phi_controller = None
         self.v_rho_controller = None
         self.controlbox = None
-        self.show_controlbox()
+        if controlbox:
+            self.show_controlbox()
 
     def get_r(self):
         return Circle.get_r_from_m(self.m)
@@ -281,19 +282,21 @@ class Engine2D:
             c = self.path_coords(path)
             self.canvas.coords(path.tag, c[0], c[1], c[2], c[3])
 
-    def create_object(self, x, y):
+    def create_object(self, x, y, m=None, v=None, color=None, controlbox=True):
         pos = np.array(self.camera.actual_point(x, y))
-        max_r = Circle.get_r_from_m(MASS_MAX)
-        for obj in self.objs:
-            max_r = min(max_r, (vector_magnitude(obj.pos - pos) - obj.get_r()) / 1.5)
-        m = Circle.get_m_from_r(random.randrange(Circle.get_r_from_m(MASS_MIN), int(max_r)))
-        v = np.array(polar2cartesian(random.randrange(-180, 180), random.randrange(VELOCITY_MAX / 2)))
-
-        r = lambda: random.randint(0, 255)
-        color = '#%02X%02X%02X' % (r(), r(), r())
+        if not m:
+            max_r = Circle.get_r_from_m(MASS_MAX)
+            for obj in self.objs:
+                max_r = min(max_r, (vector_magnitude(obj.pos - pos) - obj.get_r()) / 1.5)
+            m = Circle.get_m_from_r(random.randrange(Circle.get_r_from_m(MASS_MIN), int(max_r)))
+        if not v:
+            v = np.array(polar2cartesian(random.randrange(-180, 180), random.randrange(VELOCITY_MAX / 2)))
+        if not color:
+            rand256 = lambda: random.randint(0, 255)
+            color = '#%02X%02X%02X' % (rand256(), rand256(), rand256())
         tag = "circle%d" % len(self.objs)
         dir_tag = tag + "_dir"
-        obj = Circle(m, pos, v, color, tag, dir_tag, self)
+        obj = Circle(m, pos, v, color, tag, dir_tag, self, controlbox)
         self.objs.append(obj)
         self.create_circle(obj)
         self.create_direction(obj)
@@ -324,7 +327,7 @@ class Engine2D:
                     o1.v = np.array(rotate(v_final[0], R_))
                     o2.v = np.array(rotate(v_final[1], R_))
 
-                    pos_temp = np.array([[0, 0], [0, 0]])
+                    pos_temp = [[0, 0], [0, 0]]
                     pos_temp[1] = rotate(collision, R)
                     pos_temp[0][0] += v_final[0][0]
                     pos_temp[1][0] += v_final[1][0]
