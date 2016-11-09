@@ -1,10 +1,10 @@
 from __future__ import division
 import Tkinter
 
+from config import *
 from engine2d import Engine2D
 from engine3d import Engine3D
 from util import *
-from config import *
 
 simulator = None
 keymap = {
@@ -22,16 +22,14 @@ keymap = {
 
 
 class Simulator:
-    def __init__(self, preset):
+    def __init__(self):
         self.tk = Tkinter.Tk()
         self.tk.title(TITLE)
-        self.canvas = Tkinter.Canvas(self.tk, bg="white", width=SIZE, height=SIZE)
-        self.engine = (Engine2D if DIMENSION == 2 else Engine3D)(self.canvas, SIZE, on_key_press)
+        self.canvas = Tkinter.Canvas(self.tk, bg=BACKGROUND, width=SIZE, height=SIZE)
+        PRESET(self, SIZE, on_key_press, Engine2D=Engine2D, Engine3D=Engine3D)
         self.tk.bind("<Key>", on_key_press)
         self.canvas.bind("<Button-1>", on_click)
         self.canvas.pack()
-        if preset:
-            preset.apply()
 
 
 def on_click(event):
@@ -63,7 +61,7 @@ def on_key_press(event):
 
 def main():
     global simulator
-    simulator = Simulator(PRESET)
+    simulator = Simulator()
     Tkinter.mainloop()
 
 

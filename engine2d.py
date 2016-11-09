@@ -261,7 +261,7 @@ class Engine2D:
         return self.canvas.create_line(c[0], c[1], c[2], c[3], fill="black", tag=obj.dir_tag)
 
     def create_path(self, obj):
-        if vector_magnitude(obj.pos - obj.prev_pos) > 1:
+        if vector_magnitude(obj.pos - obj.prev_pos) > 3:
             c = self.path_coords(obj)
             self.paths.append(Path(self.canvas.create_line(c[0], c[1], c[2], c[3], fill="grey"), obj))
             obj.prev_pos = np.copy(obj.pos)
