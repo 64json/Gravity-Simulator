@@ -134,7 +134,7 @@ class Camera2D:
         self.x = 0
         self.y = 0
         self.z = 0
-        self.rho = 0
+        self.phi = 0
         self.engine = engine
         self.last_time = 0
         self.last_key = None
@@ -179,11 +179,11 @@ class Camera2D:
         self.refresh()
 
     def rotate_left(self, key):
-        self.rho -= CAMERA_ANGLE_STEP
+        self.phi -= CAMERA_ANGLE_STEP
         self.refresh()
 
     def rotate_right(self, key):
-        self.rho += CAMERA_ANGLE_STEP
+        self.phi += CAMERA_ANGLE_STEP
         self.refresh()
 
     def refresh(self):
@@ -195,15 +195,15 @@ class Camera2D:
         return 0.99 ** self.z
 
     def get_rotation_matrix(self, dir=1):
-        theta = deg2rad(self.rho)
-        sin = math.sin(theta)
-        cos = math.cos(theta)
+        phi = deg2rad(self.phi)
+        sin = math.sin(phi)
+        cos = math.cos(phi)
         return np.matrix([[cos, dir * -sin], [dir * sin, cos]])
 
     def adjust_coord(self, c):
-        theta = deg2rad(self.rho)
-        sin = math.sin(theta)
-        cos = math.cos(theta)
+        phi = deg2rad(self.phi)
+        sin = math.sin(phi)
+        cos = math.cos(phi)
         zoom = self.get_zoom()
         x = self.cx + (c[0] * cos - c[1] * sin - self.x) * zoom
         y = self.cy + (c[0] * sin + c[1] * cos - self.y) * zoom
@@ -314,9 +314,9 @@ class Engine2D:
                 d = vector_magnitude(collision)
 
                 if d < o1.get_r() + o2.get_r():
-                    theta = math.atan2(collision[1], collision[0])
-                    sin = math.sin(theta)
-                    cos = math.cos(theta)
+                    phi = math.atan2(collision[1], collision[0])
+                    sin = math.sin(phi)
+                    cos = math.cos(phi)
                     R = np.matrix([[cos, -sin], [sin, cos]])
                     R_ = np.matrix([[cos, sin], [-sin, cos]])
 

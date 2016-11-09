@@ -56,28 +56,56 @@ class Sphere(Circle):
 
 
 class Camera3D(Camera2D):
-    pass
+    def __init__(self, engine, size):
+        super(Camera3D, self).__init__(engine, size)
+        self.theta = 0
+
+    def get_coord_step(self, key, zoomed=True):
+        return super(Camera3D, self).get_coord_step(key, True)
+
+    def rotate_up(self, key):
+        self.theta -= CAMERA_ANGLE_STEP
+        self.refresh()
+
+    def rotate_right(self, key):
+        self.theta += CAMERA_ANGLE_STEP
+        self.refresh()
+
+    def get_zoom(self):
+        return 0.99 ** math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
+
+    def get_rotation_z_matrix(self, dir=1):
+        phi = deg2rad(self.phi)
+        sin = math.sin(phi)
+        cos = math.cos(phi)
+        return np.matrix([[cos, dir * -sin, 0], [dir * sin, cos, 0], [0, 0, 1]])
+
+    def get_rotation_x_matrix(self, dir=1):
+        theta = deg2rad(self.theta)
+        sin = math.sin(theta)
+        cos = math.cos(theta)
+        return np.matrix([[1, 0, 0], [0, cos, dir * -sin], [0, dir * sin, cos]])
+
+    def adjust_coord(self, c):
+        Rz = self.get_rotation_z_matrix()
+        Rx = self.get_rotation_x_matrix()
+        d = c * Rx * Rz
+        x = self.cx + (d[0] / d[2] - self.x)
+        y = self.cy + (d[1] / d[2] - self.y)
+        return x, y
+
+    def adjust_magnitude(self, s):
+        zoom = self.get_zoom()
+        return s / zoom
+
+    def actual_point(self, x, y):
+        return [0, 0, 0]  # TODO
 
 
 class Engine3D(Engine2D):
     def __init__(self, canvas, size, on_key_press):
         super(Engine3D, self).__init__(canvas, size, on_key_press)
         self.camera = Camera3D(self, size)
-
-    def object_coords(self, obj):
-        r = self.camera.adjust_magnitude(obj.get_r())
-        [x, y] = self.camera.adjust_coord(obj.pos)
-        return x - r, y - r, x + r, y + r
-
-    def direction_coords(self, obj):
-        [cx, cy] = self.camera.adjust_coord(obj.pos)
-        [dx, dy] = self.camera.adjust_coord(obj.pos + obj.v * 50)
-        return cx, cy, dx, dy
-
-    def path_coords(self, obj):
-        [fx, fy] = self.camera.adjust_coord(obj.prev_pos)
-        [tx, ty] = self.camera.adjust_coord(obj.pos)
-        return fx, fy, tx, ty
 
     def create_object(self, x, y, m=None, v=None, color=None, controlbox=True):
         pos = np.array(self.camera.actual_point(x, y))
@@ -100,40 +128,7 @@ class Engine3D(Engine2D):
         self.draw_direction(obj)
 
     def elastic_collision(self):
-        for i in range(0, len(self.objs)):
-            o1 = self.objs[i]
-            for j in range(i + 1, len(self.objs)):
-                o2 = self.objs[j]
-                collision = o2.pos - o1.pos
-                d = vector_magnitude(collision)
-
-                if d < o1.get_r() + o2.get_r():
-                    theta = math.atan2(collision[1], collision[0])
-                    sin = math.sin(theta)
-                    cos = math.cos(theta)
-                    R = np.matrix([[cos, -sin], [sin, cos]])
-                    R_ = np.matrix([[cos, sin], [-sin, cos]])
-
-                    v_temp = [[0, 0], [0, 0]]
-                    v_temp[0] = rotate(o1.v, R)
-                    v_temp[1] = rotate(o2.v, R)
-                    v_final = [[0, 0], [0, 0]]
-                    v_final[0][0] = ((o1.m - o2.m) * v_temp[0][0] + 2 * o2.m * v_temp[1][0]) / (o1.m + o2.m)
-                    v_final[0][1] = v_temp[0][1]
-                    v_final[1][0] = ((o2.m - o1.m) * v_temp[1][0] + 2 * o1.m * v_temp[0][0]) / (o1.m + o2.m)
-                    v_final[1][1] = v_temp[1][1]
-                    o1.v = np.array(rotate(v_final[0], R_))
-                    o2.v = np.array(rotate(v_final[1], R_))
-
-                    pos_temp = [[0, 0], [0, 0]]
-                    pos_temp[1] = rotate(collision, R)
-                    pos_temp[0][0] += v_final[0][0]
-                    pos_temp[1][0] += v_final[1][0]
-                    pos_final = [[0, 0], [0, 0]]
-                    pos_final[0] = rotate(pos_temp[0], R_)
-                    pos_final[1] = rotate(pos_temp[1], R_)
-                    o1.pos = o1.pos + pos_final[0]
-                    o2.pos = o1.pos + pos_final[1]
+        pass
 
     def calculate_all(self):
         for obj in self.objs:
