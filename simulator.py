@@ -38,7 +38,7 @@ def on_click(event):
     y = event.y
     if not engine.animating:
         for obj in engine.objs:
-            c = engine.circle_coords(obj)
+            c = engine.object_coords(obj)
             cx = (c[0] + c[2]) / 2
             cy = (c[1] + c[3]) / 2
             r = (c[2] - c[0]) / 2

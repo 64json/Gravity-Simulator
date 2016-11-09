@@ -4,7 +4,6 @@ from __future__ import division
 
 import Tkinter
 import random
-
 import time
 
 from control import ControlBox, Controller
@@ -104,9 +103,9 @@ class Circle:
             self.engine.controlboxes.append(self.controlbox.tk)
 
     def redraw(self):
-        self.engine.move_circle(self)
+        self.engine.move_object(self)
         self.engine.move_direction(self)
-        self.engine.create_path(self)
+        self.engine.draw_path(self)
 
     def get_neighbors(self, neighbors):
         neighbors.append(self)
@@ -248,7 +247,7 @@ class Engine2D:
         if self.animating:
             self.canvas.after(10, self.animate)
 
-    def circle_coords(self, obj):
+    def object_coords(self, obj):
         r = self.camera.adjust_magnitude(obj.get_r())
         [x, y] = self.camera.adjust_coord(obj.pos)
         return x - r, y - r, x + r, y + r
@@ -263,15 +262,15 @@ class Engine2D:
         [tx, ty] = self.camera.adjust_coord(obj.pos)
         return fx, fy, tx, ty
 
-    def create_circle(self, obj):
-        c = self.circle_coords(obj)
+    def draw_object(self, obj):
+        c = self.object_coords(obj)
         return self.canvas.create_oval(c[0], c[1], c[2], c[3], fill=obj.color, tag=obj.tag, width=0)
 
-    def create_direction(self, obj):
+    def draw_direction(self, obj):
         c = self.direction_coords(obj)
         return self.canvas.create_line(c[0], c[1], c[2], c[3], fill="black", tag=obj.dir_tag)
 
-    def create_path(self, obj):
+    def draw_path(self, obj):
         if vector_magnitude(obj.pos - obj.prev_pos) > 5:
             c = self.path_coords(obj)
             self.paths.append(Path(self.canvas.create_line(c[0], c[1], c[2], c[3], fill="grey"), obj))
@@ -280,8 +279,8 @@ class Engine2D:
                 self.canvas.delete(self.paths[0].tag)
                 self.paths = self.paths[1:]
 
-    def move_circle(self, obj):
-        c = self.circle_coords(obj)
+    def move_object(self, obj):
+        c = self.object_coords(obj)
         self.canvas.coords(obj.tag, c[0], c[1], c[2], c[3])
 
     def move_direction(self, obj):
@@ -309,8 +308,8 @@ class Engine2D:
         dir_tag = tag + "_dir"
         obj = Circle(m, pos, v, color, tag, dir_tag, self, controlbox)
         self.objs.append(obj)
-        self.create_circle(obj)
-        self.create_direction(obj)
+        self.draw_object(obj)
+        self.draw_direction(obj)
 
     def elastic_collision(self):
         for i in range(0, len(self.objs)):

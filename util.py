@@ -6,11 +6,26 @@ import numpy as np
 
 
 def polar2cartesian(phi, rho):
-    return [rho * math.cos(phi), rho * math.sin(phi)]
+    return [rho * math.cos(phi),
+            rho * math.sin(phi)]
 
 
 def cartesian2polar(x, y):
-    return [math.atan2(y, x), math.sqrt(x ** 2 + y ** 2)]
+    return [math.atan2(y, x),
+            math.sqrt(x ** 2 + y ** 2)]
+
+
+def spherical2cartesian(phi, theta, rho):
+    return [rho * math.sin(theta) * math.cos(phi),
+            rho * math.sin(theta) * math.sin(phi),
+            rho * math.cos(theta)]
+
+
+def cartesian2spherical(x, y, z):
+    rho = math.sqrt(x ** 2 + y ** 2 + z ** 2)
+    return [math.atan2(y, x),
+            math.acos(z / rho),
+            rho]
 
 
 def rad2deg(rad):
