@@ -18,6 +18,8 @@ mapping = {
     'a': 'rotate_left',
     'd': 'rotate_right'
 }
+engine = None
+tk = None
 
 
 def on_click(event):
@@ -45,11 +47,17 @@ def on_key_press(event):
         getattr(engine.camera, mapping[char])(char)
 
 
-tk = Tkinter.Tk()
-tk.title(TITLE)
-canvas = Tkinter.Canvas(tk, bg="white", width=SIZE, height=SIZE)
-engine = (Engine2D if DIMENSION == 2 else Engine3D)(canvas, SIZE, on_key_press)
-tk.bind("<Key>", on_key_press)
-canvas.bind("<Button-1>", on_click)
-canvas.pack()
-Tkinter.mainloop()
+def main():
+    global engine, tk
+    tk = Tkinter.Tk()
+    tk.title(TITLE)
+    canvas = Tkinter.Canvas(tk, bg="white", width=SIZE, height=SIZE)
+    engine = (Engine2D if DIMENSION == 2 else Engine3D)(canvas, SIZE, on_key_press)
+    tk.bind("<Key>", on_key_press)
+    canvas.bind("<Button-1>", on_click)
+    canvas.pack()
+    Tkinter.mainloop()
+
+
+if __name__ == "__main__":
+    main()
