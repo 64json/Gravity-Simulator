@@ -1,6 +1,6 @@
 import preset
 
-PRESET = preset.EMPTY_2D
+PRESET = preset.SOLAR_SYSTEM_2D
 TITLE = "Gravity Simulator"
 SIZE = 1000
 BACKGROUND = "white"

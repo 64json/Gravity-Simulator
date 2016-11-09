@@ -22,11 +22,11 @@ keymap = {
 
 
 class Simulator:
-    def __init__(self):
+    def __init__(self, preset):
         self.tk = Tkinter.Tk()
         self.tk.title(TITLE)
         self.canvas = Tkinter.Canvas(self.tk, bg=BACKGROUND, width=SIZE, height=SIZE)
-        PRESET(self, SIZE, on_key_press, Engine2D=Engine2D, Engine3D=Engine3D)
+        preset(self, SIZE, on_key_press, Engine2D=Engine2D, Engine3D=Engine3D)
         self.tk.bind("<Key>", on_key_press)
         self.canvas.bind("<Button-1>", on_click)
         self.canvas.pack()
@@ -55,13 +55,13 @@ def on_key_press(event):
         engine.animating = not engine.animating
         simulator.tk.title("%s (%s)" % (TITLE, "Simulating" if engine.animating else "Paused"))
         engine.animate()
-    elif char in keymap:
+    elif char in keymap and hasattr(engine.camera, keymap[char]):
         getattr(engine.camera, keymap[char])(char)
 
 
 def main():
     global simulator
-    simulator = Simulator()
+    simulator = Simulator(PRESET)
     Tkinter.mainloop()
 
 

@@ -141,7 +141,7 @@ class Camera2D:
         self.x = 0
         self.y = 0
         self.z = 0
-        self.rho = 90
+        self.rho = 0
         self.engine = engine
         self.last_time = 0
         self.last_key = None
@@ -162,53 +162,68 @@ class Camera2D:
         return CAMERA_COORD_STEP * CAMERA_ACCELERATION ** self.combo / zoom
 
     def up(self, key):
-        step = self.get_coord_step(key)
-        self.x += step * math.cos(deg2rad(self.rho))
-        self.y -= step * math.sin(deg2rad(self.rho))
+        self.y -= self.get_coord_step(key)
         self.refresh()
 
     def down(self, key):
-        step = self.get_coord_step(key)
-        self.x -= step * math.cos(deg2rad(self.rho))
-        self.y += step * math.sin(deg2rad(self.rho))
+        self.y += self.get_coord_step(key)
         self.refresh()
 
     def left(self, key):
-        step = self.get_coord_step(key)
-        self.x -= step * (1 - math.cos(deg2rad(self.rho)))
-        self.y += step * (1 - math.sin(deg2rad(self.rho)))
+        self.x -= self.get_coord_step(key)
         self.refresh()
 
     def right(self, key):
-        step = self.get_coord_step(key)
-        self.x += step * (1 - math.cos(deg2rad(self.rho)))
-        self.y -= step * (1 - math.sin(deg2rad(self.rho)))
+        self.x += self.get_coord_step(key)
         self.refresh()
 
     def zoom_in(self, key):
-        step = self.get_coord_step(key, False)
-        self.z -= step
+        self.z -= self.get_coord_step(key, False)
         self.refresh()
 
     def zoom_out(self, key):
-        step = self.get_coord_step(key, False)
-        self.z += step
+        self.z += self.get_coord_step(key, False)
+        self.refresh()
+
+    def rotate_left(self, key):
+        self.rho -= CAMERA_ANGLE_STEP
+        self.refresh()
+
+    def rotate_right(self, key):
+        self.rho += CAMERA_ANGLE_STEP
         self.refresh()
 
     def refresh(self):
-        self.engine.redraw_all()
+        if not self.engine.animating:
+            self.engine.redraw_all()
         self.engine.move_paths()
 
     def get_zoom(self):
         return 0.99 ** self.z
 
-    def adjust(self, c):
+    def get_rotation_matrix(self, dir=1):
+        theta = deg2rad(self.rho)
+        sin = math.sin(theta)
+        cos = math.cos(theta)
+        return np.matrix([[cos, dir * -sin], [dir * sin, cos]])
+
+    def adjust_coord(self, c):
+        theta = deg2rad(self.rho)
+        sin = math.sin(theta)
+        cos = math.cos(theta)
         zoom = self.get_zoom()
-        return self.cx + (c[0] - self.x) * zoom, self.cy + (c[1] - self.y) * zoom
+        x = self.cx + (c[0] * cos - c[1] * sin - self.x) * zoom
+        y = self.cy + (c[0] * sin + c[1] * cos - self.y) * zoom
+        return x, y
+
+    def adjust_magnitude(self, s):
+        zoom = self.get_zoom()
+        return s * zoom
 
     def actual_point(self, x, y):
+        R_ = self.get_rotation_matrix(-1)
         zoom = self.get_zoom()
-        return (x - self.cx) / zoom + self.x, (y - self.cy) / zoom + self.y
+        return rotate(([x, y] - np.array([self.cx, self.cy])) / zoom + [self.x, self.y], R_)
 
 
 class Engine2D:
@@ -231,26 +246,22 @@ class Engine2D:
         self.calculate_all()
         self.redraw_all()
         if self.animating:
-            self.canvas.after(1, self.animate)
-
-    def adjust(self, coords):
-        return self.camera.adjust(coords[:2]) + self.camera.adjust(coords[2:])
+            self.canvas.after(10, self.animate)
 
     def circle_coords(self, obj):
-        r = obj.get_r()
-        x = obj.pos[0]
-        y = obj.pos[1]
-        return self.adjust((x - r, y - r, x + r, y + r))
+        r = self.camera.adjust_magnitude(obj.get_r())
+        [x, y] = self.camera.adjust_coord(obj.pos)
+        return x - r, y - r, x + r, y + r
 
     def direction_coords(self, obj):
-        c = obj.pos
-        d = obj.pos + obj.v * 50
-        return self.adjust((c[0], c[1], d[0], d[1]))
+        [cx, cy] = self.camera.adjust_coord(obj.pos)
+        [dx, dy] = self.camera.adjust_coord(obj.pos + obj.v * 50)
+        return cx, cy, dx, dy
 
     def path_coords(self, obj):
-        f = obj.prev_pos
-        t = obj.pos
-        return self.adjust((f[0], f[1], t[0], t[1]))
+        [fx, fy] = self.camera.adjust_coord(obj.prev_pos)
+        [tx, ty] = self.camera.adjust_coord(obj.pos)
+        return fx, fy, tx, ty
 
     def create_circle(self, obj):
         c = self.circle_coords(obj)
@@ -261,7 +272,7 @@ class Engine2D:
         return self.canvas.create_line(c[0], c[1], c[2], c[3], fill="black", tag=obj.dir_tag)
 
     def create_path(self, obj):
-        if vector_magnitude(obj.pos - obj.prev_pos) > 3:
+        if vector_magnitude(obj.pos - obj.prev_pos) > 5:
             c = self.path_coords(obj)
             self.paths.append(Path(self.canvas.create_line(c[0], c[1], c[2], c[3], fill="grey"), obj))
             obj.prev_pos = np.copy(obj.pos)
