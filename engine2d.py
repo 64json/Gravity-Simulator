@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import division
-
 import Tkinter
 import random
 import time
@@ -68,7 +67,7 @@ class Circle:
     def control_v(self, e):
         phi = deg2rad(self.v_phi_controller.get())
         rho = self.v_rho_controller.get()
-        self.v = np.array(polar2cartesian(phi, rho))
+        self.v = np.array(polar2cartesian(rho, phi))
         self.redraw()
 
     def show_controlbox(self):
@@ -77,48 +76,43 @@ class Circle:
         except:
             margin = 1.5
 
-            pos_range = max(self.engine.camera.size / 2, abs(self.pos[0]) * margin, abs(self.pos[1]) * margin)
+            pos_range = max(self.engine.camera.size / 2, abs(max(self.pos, key=abs)) * margin)
             for obj in self.engine.objs:
-                pos_range = max(pos_range, abs(obj.pos[0]) * margin, abs(obj.pos[1]) * margin)
+                pos_range = max(pos_range, abs(max(obj.pos, key=abs)) * margin)
 
             m = self.m
 
-            v = cartesian2polar(self.v[0], self.v[1])
+            v = cartesian2auto(self.v)
             v_range = max(VELOCITY_MAX, vector_magnitude(self.v) * margin)
             for obj in self.engine.objs:
                 v_range = max(v_range, vector_magnitude(obj.v) * margin)
 
-            self.m_controller = Controller("Mass m", MASS_MIN, MASS_MAX, m, self.control_m)
-            self.pos_x_controller = Controller("Position x", -pos_range, pos_range, self.pos[0], self.control_pos)
-            self.pos_y_controller = Controller("Position y", -pos_range, pos_range, self.pos[1], self.control_pos)
-            self.v_phi_controller = Controller("Velocity φ", -180, 180, rad2deg(v[0]), self.control_v)
-            self.v_rho_controller = Controller("Velocity ρ", 0, v_range, v[1], self.control_v)
-            self.controlbox = ControlBox(self.tag, [
-                self.m_controller,
+            self.setup_controllers(pos_range, m, v, v_range)
+            self.controlbox = ControlBox(self.tag, self.get_controllers(), self.engine.on_key_press)
+            self.engine.controlboxes.append(self.controlbox.tk)
+
+    def setup_controllers(self, pos_range, m, v, v_range):
+        self.m_controller = Controller("Mass m", MASS_MIN, MASS_MAX, m, self.control_m)
+        self.pos_x_controller = Controller("Position x", -pos_range, pos_range, self.pos[0], self.control_pos)
+        self.pos_y_controller = Controller("Position y", -pos_range, pos_range, self.pos[1], self.control_pos)
+        self.v_rho_controller = Controller("Velocity ρ", 0, v_range, v[0], self.control_v)
+        self.v_phi_controller = Controller("Velocity φ", -180, 180, rad2deg(v[1]), self.control_v)
+
+    def get_controllers(self):
+        return [self.m_controller,
                 self.pos_x_controller,
                 self.pos_y_controller,
-                self.v_phi_controller,
                 self.v_rho_controller,
-            ], self.engine.on_key_press)
-            self.engine.controlboxes.append(self.controlbox.tk)
+                self.v_phi_controller]
 
     def redraw(self):
         self.engine.move_object(self)
         self.engine.move_direction(self)
         self.engine.draw_path(self)
 
-    def get_neighbors(self, neighbors):
-        neighbors.append(self)
-        for obj in self.engine.objs:
-            if obj in neighbors:
-                continue
-            d = vector_magnitude((self.pos + self.v) - (obj.pos + obj.v))
-            if d < self.get_r() + obj.get_r():
-                obj.get_neighbors(neighbors)
-
     @staticmethod
     def get_r_from_m(m):
-        return math.sqrt(m)
+        return m ** (1 / 2)
 
     @staticmethod
     def get_m_from_r(r):
@@ -300,7 +294,7 @@ class Engine2D:
                 max_r = min(max_r, (vector_magnitude(obj.pos - pos) - obj.get_r()) / 1.5)
             m = Circle.get_m_from_r(random.randrange(Circle.get_r_from_m(MASS_MIN), int(max_r)))
         if not v:
-            v = np.array(polar2cartesian(random.randrange(-180, 180), random.randrange(VELOCITY_MAX / 2)))
+            v = np.array(polar2cartesian(random.randrange(VELOCITY_MAX / 2), random.randrange(-180, 180)))
         if not color:
             rand256 = lambda: random.randint(0, 255)
             color = '#%02X%02X%02X' % (rand256(), rand256(), rand256())

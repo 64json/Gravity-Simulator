@@ -1,13 +1,58 @@
-from __future__ import division
-from engine2d import *
+# -*- coding: utf-8 -*-
 
-"""Spherical coordinate system
-https://en.wikipedia.org/wiki/Spherical_coordinate_system
-"""
+from __future__ import division
+
+from engine2d import *
 
 
 class Sphere(Circle):
-    pass
+    """Spherical coordinate system
+    https://en.wikipedia.org/wiki/Spherical_coordinate_system
+    """
+
+    def __init__(self, m, pos, v, color, tag, dir_tag, engine, controlbox):
+        self.pos_z_controller = None
+        self.v_theta_controller = None
+        super(Sphere, self).__init__(m, pos, v, color, tag, dir_tag, engine, controlbox)
+
+    def get_r(self):
+        return Sphere.get_r_from_m(self.m)
+
+    def control_pos(self, e):
+        x = self.pos_x_controller.get()
+        y = self.pos_y_controller.get()
+        z = self.pos_z_controller.get()
+        self.pos = np.array([x, y, z])
+        self.redraw()
+
+    def control_v(self, e):
+        phi = deg2rad(self.v_phi_controller.get())
+        theta = deg2rad(self.v_theta_controller.get())
+        rho = self.v_rho_controller.get()
+        self.v = np.array(spherical2cartesian(rho, phi, theta))
+        self.redraw()
+
+    def setup_controllers(self, pos_range, m, v, v_range):
+        super(Sphere, self).setup_controllers(pos_range, m, v, v_range)
+        self.pos_z_controller = Controller("Position z", -pos_range, pos_range, self.pos[2], self.control_pos)
+        self.v_theta_controller = Controller("Velocity θ", -180, 180, rad2deg(v[2]), self.control_v)
+
+    def get_controllers(self):
+        return [self.m_controller,
+                self.pos_x_controller,
+                self.pos_y_controller,
+                self.pos_z_controller,
+                self.v_rho_controller,
+                self.v_phi_controller,
+                self.v_theta_controller]
+
+    @staticmethod
+    def get_r_from_m(m):
+        return m ** (1 / 3)
+
+    @staticmethod
+    def get_m_from_r(r):
+        return r ** 3
 
 
 class Camera3D(Camera2D):
@@ -42,8 +87,8 @@ class Engine3D(Engine2D):
                 max_r = min(max_r, (vector_magnitude(obj.pos - pos) - obj.get_r()) / 1.5)
             m = Sphere.get_m_from_r(random.randrange(Sphere.get_r_from_m(MASS_MIN), int(max_r)))
         if not v:
-            v = np.array(spherical2cartesian(random.randrange(-180, 180), random.randrange(-180, 180),
-                                             random.randrange(VELOCITY_MAX / 2)))
+            v = np.array(spherical2cartesian(random.randrange(VELOCITY_MAX / 2), random.randrange(-180, 180),
+                                             random.randrange(-180, 180)))
         if not color:
             rand256 = lambda: random.randint(0, 255)
             color = '#%02X%02X%02X' % (rand256(), rand256(), rand256())
