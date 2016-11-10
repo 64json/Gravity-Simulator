@@ -25,7 +25,7 @@ def cartesian2spherical(x, y, z):
     rho = math.sqrt(x ** 2 + y ** 2 + z ** 2)
     return [rho,
             math.atan2(y, x),
-            math.acos(z / rho)]
+            math.acos(z / rho) if rho != 0 else 0]
 
 
 def cartesian2auto(vector):

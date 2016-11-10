@@ -60,46 +60,59 @@ class Camera3D(Camera2D):
         super(Camera3D, self).__init__(engine, size)
         self.theta = 0
 
+        self.x = self.y = 0
+        self.z = 5
+
     def get_coord_step(self, key, zoomed=True):
-        return super(Camera3D, self).get_coord_step(key, True)
+        return super(Camera3D, self).get_coord_step(key, False)
+
+    def zoom_in(self, key):
+        self.z -= self.get_coord_step(key) / 5
+        self.refresh()
+
+    def zoom_out(self, key):
+        self.z += self.get_coord_step(key) / 5
+        self.refresh()
 
     def rotate_up(self, key):
         self.theta -= CAMERA_ANGLE_STEP
         self.refresh()
 
-    def rotate_right(self, key):
+    def rotate_down(self, key):
         self.theta += CAMERA_ANGLE_STEP
         self.refresh()
 
-    def get_zoom(self):
-        return 0.99 ** math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
+    def get_zoom(self, c):
+        return 0.99 ** (self.z - c[2])
 
-    def get_rotation_z_matrix(self, dir=1):
+    def get_rotation_x_matrix(self, dir=1):
         phi = deg2rad(self.phi)
         sin = math.sin(phi)
         cos = math.cos(phi)
-        return np.matrix([[cos, dir * -sin, 0], [dir * sin, cos, 0], [0, 0, 1]])
+        return np.matrix([[1, 0, 0], [0, cos, dir * -sin], [0, dir * sin, cos]])
 
-    def get_rotation_x_matrix(self, dir=1):
+    def get_rotation_y_matrix(self, dir=1):
         theta = deg2rad(self.theta)
         sin = math.sin(theta)
         cos = math.cos(theta)
-        return np.matrix([[1, 0, 0], [0, cos, dir * -sin], [0, dir * sin, cos]])
+        return np.matrix([[cos, 0, dir * -sin], [0, 1, 0], [dir * sin, 0, cos]])
 
     def adjust_coord(self, c):
-        Rz = self.get_rotation_z_matrix()
-        Rx = self.get_rotation_x_matrix()
-        d = c * Rx * Rz
-        x = self.cx + (d[0] / d[2] - self.x)
-        y = self.cy + (d[1] / d[2] - self.y)
+        print '---'
+        print 'x', self.x
+        print 'y', self.y
+        print 'z', self.z
+        zoom = self.get_zoom(c)
+        x = self.cx + ((c[0] - self.x) * zoom)
+        y = self.cy + ((c[1] - self.y) * zoom)
         return x, y
 
-    def adjust_magnitude(self, s):
-        zoom = self.get_zoom()
-        return s / zoom
+    def adjust_magnitude(self, c, s):
+        zoom = self.get_zoom(c)
+        return s * zoom
 
     def actual_point(self, x, y):
-        return [0, 0, 0]  # TODO
+        return (([x, y] - np.array([self.cx, self.cy])) + [self.x, self.y]).tolist() + [0]
 
 
 class Engine3D(Engine2D):

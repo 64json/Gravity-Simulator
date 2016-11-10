@@ -10,7 +10,7 @@ from util import *
 from config import *
 
 
-class Circle:
+class Circle(object):
     """Polar coordinate system
     https://en.wikipedia.org/wiki/Polar_coordinate_system
     """
@@ -122,14 +122,14 @@ class Circle:
         return str({'tag': self.tag, 'v': self.v, 'pos': self.pos})
 
 
-class Path:
+class Path(object):
     def __init__(self, tag, obj):
         self.tag = tag,
         self.prev_pos = np.copy(obj.prev_pos)
         self.pos = np.copy(obj.pos)
 
 
-class Camera2D:
+class Camera2D(object):
     def __init__(self, engine, size):
         self.x = 0
         self.y = 0
@@ -209,7 +209,7 @@ class Camera2D:
         y = self.cy + (c[0] * sin + c[1] * cos - self.y) * zoom
         return x, y
 
-    def adjust_magnitude(self, s):
+    def adjust_magnitude(self, c, s):
         zoom = self.get_zoom()
         return s * zoom
 
@@ -219,7 +219,7 @@ class Camera2D:
         return rotate(([x, y] - np.array([self.cx, self.cy])) / zoom + [self.x, self.y], R_)
 
 
-class Engine2D:
+class Engine2D(object):
     def __init__(self, canvas, size, on_key_press):
         self.canvas = canvas
         self.objs = []
@@ -242,7 +242,7 @@ class Engine2D:
             self.canvas.after(10, self.animate)
 
     def object_coords(self, obj):
-        r = self.camera.adjust_magnitude(obj.get_r())
+        r = self.camera.adjust_magnitude(obj.pos, obj.get_r())
         [x, y] = self.camera.adjust_coord(obj.pos)
         return x - r, y - r, x + r, y + r
 
