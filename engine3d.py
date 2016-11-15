@@ -85,21 +85,9 @@ class Camera3D(Camera2D):
     def get_zoom(self, rotated_z):
         return 0.99 ** (self.z - rotated_z)
 
-    def get_rotation_x_matrix(self, dir=1):
-        theta = deg2rad(self.theta)
-        sin = math.sin(theta)
-        cos = math.cos(theta)
-        return np.matrix([[1, 0, 0], [0, cos, dir * -sin], [0, dir * sin, cos]])
-
-    def get_rotation_y_matrix(self, dir=1):
-        phi = deg2rad(self.phi)
-        sin = math.sin(phi)
-        cos = math.cos(phi)
-        return np.matrix([[cos, 0, dir * -sin], [0, 1, 0], [dir * sin, 0, cos]])
-
     def adjust_coord(self, c):
-        Rx = self.get_rotation_x_matrix()
-        Ry = self.get_rotation_y_matrix()
+        Rx = get_rotation_x_matrix(deg2rad(self.theta))
+        Ry = get_rotation_y_matrix(deg2rad(self.phi))
         c = (c * Rx * Ry).tolist()[0]
         zoom = self.get_zoom(c[2])
         x = self.cx + ((c[0] - self.x) * zoom)
@@ -111,10 +99,22 @@ class Camera3D(Camera2D):
         return s * zoom
 
     def actual_point(self, x, y):
-        Rx_ = self.get_rotation_x_matrix(-1)
-        Ry_ = self.get_rotation_y_matrix(-1)
+        Rx_ = get_rotation_x_matrix(deg2rad(self.theta), -1)
+        Ry_ = get_rotation_y_matrix(deg2rad(self.phi), -1)
         c = (([x, y] - np.array([self.cx, self.cy])) + [self.x, self.y]).tolist() + [self.z]
         return (c * Rx_ * Ry_).tolist()[0]
+
+
+def get_rotation_x_matrix(theta, dir=1):
+    sin = math.sin(theta)
+    cos = math.cos(theta)
+    return np.matrix([[1, 0, 0], [0, cos, dir * -sin], [0, dir * sin, cos]])
+
+
+def get_rotation_y_matrix(phi, dir=1):
+    sin = math.sin(phi)
+    cos = math.cos(phi)
+    return np.matrix([[cos, 0, dir * -sin], [0, 1, 0], [dir * sin, 0, cos]])
 
 
 class Engine3D(Engine2D):
@@ -143,7 +143,44 @@ class Engine3D(Engine2D):
         self.draw_direction(obj)
 
     def elastic_collision(self):
-        pass
+        for i in range(0, len(self.objs)):
+            o1 = self.objs[i]
+            for j in range(i + 1, len(self.objs)):
+                o2 = self.objs[j]
+                collision = o2.pos - o1.pos
+                d = vector_magnitude(collision)
+
+                if d < o1.get_r() + o2.get_r():
+                    phi = math.atan2(collision[1], collision[0])
+                    rho = math.sqrt(collision[0] ** 2 + collision[1] ** 2 + collision[2] ** 2)
+                    theta = math.acos(collision[2] / rho) if rho != 0 else 0
+                    Rx = get_rotation_x_matrix(theta)
+                    Rx_ = get_rotation_x_matrix(theta, -1)
+                    Ry = get_rotation_y_matrix(phi)
+                    Ry_ = get_rotation_y_matrix(phi, -1)
+
+                    v_temp = [[0, 0, 0], [0, 0, 0]]
+                    v_temp[0] = rotate(rotate(o1.v, Rx), Ry)
+                    v_temp[1] = rotate(rotate(o2.v, Rx), Ry)
+                    v_final = [[0, 0, 0], [0, 0, 0]]
+                    v_final[0][0] = ((o1.m - o2.m) * v_temp[0][0] + 2 * o2.m * v_temp[1][0]) / (o1.m + o2.m)
+                    v_final[0][1] = v_temp[0][1]
+                    v_final[0][2] = v_temp[0][2]
+                    v_final[1][0] = ((o2.m - o1.m) * v_temp[1][0] + 2 * o1.m * v_temp[0][0]) / (o1.m + o2.m)
+                    v_final[1][1] = v_temp[1][1]
+                    v_final[1][2] = v_temp[1][2]
+                    o1.v = np.array(rotate(rotate(v_final[0], Rx_), Ry_))
+                    o2.v = np.array(rotate(rotate(v_final[1], Rx_), Ry_))
+
+                    pos_temp = [[0, 0, 0], [0, 0, 0]]
+                    pos_temp[1] = rotate(rotate(collision, Rx), Ry)
+                    pos_temp[0][0] += v_final[0][0]
+                    pos_temp[1][0] += v_final[1][0]
+                    pos_final = [[0, 0, 0], [0, 0, 0]]
+                    pos_final[0] = rotate(rotate(pos_temp[0], Rx_), Ry_)
+                    pos_final[1] = rotate(rotate(pos_temp[1], Rx_), Ry_)
+                    o1.pos = o1.pos + pos_final[0]
+                    o2.pos = o1.pos + pos_final[1]
 
     def calculate_all(self):
         for obj in self.objs:
