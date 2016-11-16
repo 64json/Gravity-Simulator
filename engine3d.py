@@ -59,9 +59,7 @@ class Camera3D(Camera2D):
     def __init__(self, engine, size):
         super(Camera3D, self).__init__(engine, size)
         self.theta = 0
-
-        self.x = self.y = 0
-        self.z = 5
+        self.z = 100
 
     def get_coord_step(self, key, zoomed=True):
         return super(Camera3D, self).get_coord_step(key, False)
@@ -82,26 +80,35 @@ class Camera3D(Camera2D):
         self.theta += CAMERA_ANGLE_STEP
         self.refresh()
 
-    def get_zoom(self, rotated_z):
-        return 0.99 ** (self.z - rotated_z)
+    def get_zoom(self, z, allow_invisible=False):
+        distance = self.z - z
+        if allow_invisible:
+            if distance == 0:
+                distance = 1e-10
+            elif distance < 0:
+                distance *= -1
+        elif distance <= 0:
+            raise InvisibleError
+        return 100 / distance
 
-    def adjust_coord(self, c):
+    def adjust_coord(self, c, allow_invisible=False):
         Rx = get_rotation_x_matrix(deg2rad(self.theta))
         Ry = get_rotation_y_matrix(deg2rad(self.phi))
-        c = (c * Rx * Ry).tolist()[0]
-        zoom = self.get_zoom(c[2])
-        x = self.cx + ((c[0] - self.x) * zoom)
-        y = self.cy + ((c[1] - self.y) * zoom)
-        return x, y
+        c = rotate(rotate(c, Rx), Ry)
+        zoom = self.get_zoom(c[2], allow_invisible)
+        return self.center + (c[:2] - [self.x, self.y]) * zoom
 
     def adjust_magnitude(self, c, s):
+        Rx = get_rotation_x_matrix(deg2rad(self.theta))
+        Ry = get_rotation_y_matrix(deg2rad(self.phi))
+        c = rotate(rotate(c, Rx), Ry)
         zoom = self.get_zoom(c[2])
         return s * zoom
 
     def actual_point(self, x, y):
         Rx_ = get_rotation_x_matrix(deg2rad(self.theta), -1)
         Ry_ = get_rotation_y_matrix(deg2rad(self.phi), -1)
-        c = (([x, y] - np.array([self.cx, self.cy])) + [self.x, self.y]).tolist() + [self.z]
+        c = (([x, y] - self.center) + [self.x, self.y]).tolist() + [0]
         return (c * Rx_ * Ry_).tolist()[0]
 
 

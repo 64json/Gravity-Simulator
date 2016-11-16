@@ -10,6 +10,10 @@ from util import *
 from config import *
 
 
+class InvisibleError(Exception):
+    pass
+
+
 class Circle(object):
     """Polar coordinate system
     https://en.wikipedia.org/wiki/Polar_coordinate_system
@@ -140,7 +144,7 @@ class Camera2D(object):
         self.last_key = None
         self.combo = 0
         self.size = size
-        self.center = np.array([size/2, size/2])
+        self.center = np.array([size / 2, size / 2])
 
     def get_coord_step(self, key, zoomed=True):
         current_time = time.time()
@@ -191,14 +195,8 @@ class Camera2D(object):
     def get_zoom(self):
         return 0.99 ** self.z
 
-    def get_rotation_matrix(self, dir=1):
-        phi = deg2rad(self.phi)
-        sin = math.sin(phi)
-        cos = math.cos(phi)
-        return np.matrix([[cos, dir * -sin], [dir * sin, cos]])
-
     def adjust_coord(self, c):
-        R = self.get_rotation_matrix()
+        R = get_rotation_matrix(deg2rad(self.phi))
         zoom = self.get_zoom()
         return self.center + (rotate(c, R) - [self.x, self.y]) * zoom
 
@@ -207,9 +205,15 @@ class Camera2D(object):
         return s * zoom
 
     def actual_point(self, x, y):
-        R_ = self.get_rotation_matrix(-1)
+        R_ = get_rotation_matrix(deg2rad(self.phi), -1)
         zoom = self.get_zoom()
         return rotate(([x, y] - self.center) / zoom + [self.x, self.y], R_)
+
+
+def get_rotation_matrix(phi, dir=1):
+    sin = math.sin(phi)
+    cos = math.cos(phi)
+    return np.matrix([[cos, dir * -sin], [dir * sin, cos]])
 
 
 class Engine2D(object):
@@ -250,7 +254,7 @@ class Engine2D(object):
 
     def direction_coords(self, obj):
         [cx, cy] = self.camera.adjust_coord(obj.pos)
-        [dx, dy] = self.camera.adjust_coord(obj.pos + obj.v * 50)
+        [dx, dy] = self.camera.adjust_coord(obj.pos + obj.v * 50, True)
         return cx, cy, dx, dy
 
     def path_coords(self, obj):
@@ -259,16 +263,25 @@ class Engine2D(object):
         return fx, fy, tx, ty
 
     def draw_object(self, obj):
-        c = self.object_coords(obj)
+        try:
+            c = self.object_coords(obj)
+        except InvisibleError:
+            c = [0, 0, 0, 0]
         return self.canvas.create_oval(c[0], c[1], c[2], c[3], fill=obj.color, tag=obj.tag, width=0)
 
     def draw_direction(self, obj):
-        c = self.direction_coords(obj)
+        try:
+            c = self.direction_coords(obj)
+        except InvisibleError:
+            c = [0, 0, 0, 0]
         return self.canvas.create_line(c[0], c[1], c[2], c[3], fill="black", tag=obj.dir_tag)
 
     def draw_path(self, obj):
         if vector_magnitude(obj.pos - obj.prev_pos) > 5:
-            c = self.path_coords(obj)
+            try:
+                c = self.path_coords(obj)
+            except InvisibleError:
+                c = [0, 0, 0, 0]
             self.paths.append(Path(self.canvas.create_line(c[0], c[1], c[2], c[3], fill="grey"), obj))
             obj.prev_pos = np.copy(obj.pos)
             if len(self.paths) > MAX_PATHS:
@@ -276,17 +289,29 @@ class Engine2D(object):
                 self.paths = self.paths[1:]
 
     def move_object(self, obj):
-        c = self.object_coords(obj)
-        self.canvas.coords(obj.tag, c[0], c[1], c[2], c[3])
+        try:
+            c = self.object_coords(obj)
+            self.canvas.coords(obj.tag, c[0], c[1], c[2], c[3])
+            self.canvas.itemconfigure(obj.tag, state='normal')
+        except InvisibleError:
+            self.canvas.itemconfigure(obj.tag, state='hidden')
 
     def move_direction(self, obj):
-        c = self.direction_coords(obj)
-        self.canvas.coords(obj.dir_tag, c[0], c[1], c[2], c[3])
+        try:
+            c = self.direction_coords(obj)
+            self.canvas.coords(obj.dir_tag, c[0], c[1], c[2], c[3])
+            self.canvas.itemconfigure(obj.dir_tag, state='normal')
+        except InvisibleError:
+            self.canvas.itemconfigure(obj.dir_tag, state='hidden')
 
     def move_paths(self):
         for path in self.paths:
-            c = self.path_coords(path)
-            self.canvas.coords(path.tag, c[0], c[1], c[2], c[3])
+            try:
+                c = self.path_coords(path)
+                self.canvas.coords(path.tag, c[0], c[1], c[2], c[3])
+                self.canvas.itemconfigure(path.tag, state='normal')
+            except InvisibleError:
+                self.canvas.itemconfigure(path.tag, state='hidden')
 
     def create_object(self, x, y, m=None, v=None, color=None, controlbox=True):
         pos = np.array(self.camera.actual_point(x, y))
@@ -317,10 +342,8 @@ class Engine2D(object):
 
                 if d < o1.get_r() + o2.get_r():
                     phi = math.atan2(collision[1], collision[0])
-                    sin = math.sin(phi)
-                    cos = math.cos(phi)
-                    R = np.matrix([[cos, -sin], [sin, cos]])
-                    R_ = np.matrix([[cos, sin], [-sin, cos]])
+                    R = get_rotation_matrix(phi)
+                    R_ = get_rotation_matrix(phi, -1)
 
                     v_temp = [[0, 0], [0, 0]]
                     v_temp[0] = rotate(o1.v, R)
