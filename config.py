@@ -1,6 +1,6 @@
 import preset
 
-PRESET = preset.EMPTY_3D
+PRESET = preset.EMPTY_2D
 TITLE = "Gravity Simulator"
 SIZE = 1000
 BACKGROUND = "white"

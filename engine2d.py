@@ -140,8 +140,7 @@ class Camera2D(object):
         self.last_key = None
         self.combo = 0
         self.size = size
-        self.cx = size / 2
-        self.cy = size / 2
+        self.center = np.array([size/2, size/2])
 
     def get_coord_step(self, key, zoomed=True):
         current_time = time.time()
@@ -199,13 +198,9 @@ class Camera2D(object):
         return np.matrix([[cos, dir * -sin], [dir * sin, cos]])
 
     def adjust_coord(self, c):
-        phi = deg2rad(self.phi)
-        sin = math.sin(phi)
-        cos = math.cos(phi)
+        R = self.get_rotation_matrix()
         zoom = self.get_zoom()
-        x = self.cx + (c[0] * cos - c[1] * sin - self.x) * zoom
-        y = self.cy + (c[0] * sin + c[1] * cos - self.y) * zoom
-        return x, y
+        return self.center + (rotate(c, R) - [self.x, self.y]) * zoom
 
     def adjust_magnitude(self, c, s):
         zoom = self.get_zoom()
@@ -214,7 +209,7 @@ class Camera2D(object):
     def actual_point(self, x, y):
         R_ = self.get_rotation_matrix(-1)
         zoom = self.get_zoom()
-        return rotate(([x, y] - np.array([self.cx, self.cy])) / zoom + [self.x, self.y], R_)
+        return rotate(([x, y] - self.center) / zoom + [self.x, self.y], R_)
 
 
 class Engine2D(object):
@@ -227,6 +222,8 @@ class Engine2D(object):
         self.camera = Camera2D(self, size)
         self.on_key_press = on_key_press
         self.camera_changed = False
+        self.fps_last_time = time.time()
+        self.fps_count = 0
 
     def destroy_controlboxes(self):
         for controlbox in self.controlboxes:
@@ -237,7 +234,9 @@ class Engine2D(object):
         self.controlboxes = []
 
     def animate(self):
+        self.print_fps()
         if self.camera_changed:
+            self.camera_changed = False
             self.move_paths()
         if self.animating:
             self.calculate_all()
@@ -331,8 +330,8 @@ class Engine2D(object):
                     v_final[0][1] = v_temp[0][1]
                     v_final[1][0] = ((o2.m - o1.m) * v_temp[1][0] + 2 * o1.m * v_temp[0][0]) / (o1.m + o2.m)
                     v_final[1][1] = v_temp[1][1]
-                    o1.v = np.array(rotate(v_final[0], R_))
-                    o2.v = np.array(rotate(v_final[1], R_))
+                    o1.v = rotate(v_final[0], R_)
+                    o2.v = rotate(v_final[1], R_)
 
                     pos_temp = [[0, 0], [0, 0]]
                     pos_temp[1] = rotate(collision, R)
@@ -356,3 +355,12 @@ class Engine2D(object):
     def redraw_all(self):
         for obj in self.objs:
             obj.redraw()
+
+    def print_fps(self):
+        self.fps_count += 1
+        current_time = time.time()
+        fps_time_diff = current_time - self.fps_last_time
+        if fps_time_diff > 1:
+            print '%d fps' % (self.fps_count / fps_time_diff)
+            self.fps_last_time = current_time
+            self.fps_count = 0

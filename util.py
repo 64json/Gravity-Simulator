@@ -55,4 +55,4 @@ def c2d():
 
 
 def rotate(vector, matrix):
-    return (vector * matrix).tolist()[0]
+    return (vector * matrix).getA()[0]
