@@ -7,7 +7,6 @@ import time
 
 from control import ControlBox, Controller
 from util import *
-from config import *
 
 
 class InvisibleError(Exception):
@@ -19,7 +18,8 @@ class Circle(object):
     https://en.wikipedia.org/wiki/Polar_coordinate_system
     """
 
-    def __init__(self, m, pos, v, color, tag, dir_tag, engine, controlbox):
+    def __init__(self, config, m, pos, v, color, tag, dir_tag, engine, controlbox):
+        self.config = config
         self.m = m
         self.pos = pos
         self.prev_pos = np.copy(pos)
@@ -50,7 +50,7 @@ class Circle(object):
             magnitude = vector_magnitude(vector)
             unit_vector = vector / magnitude
             F += obj.m / magnitude ** 2 * unit_vector
-        F *= -G * self.m
+        F *= -self.config.G * self.m
         a = F / self.m
         self.v += a
 
@@ -80,14 +80,14 @@ class Circle(object):
         except:
             margin = 1.5
 
-            pos_range = max(self.engine.camera.size / 2, abs(max(self.pos, key=abs)) * margin)
+            pos_range = max(max(self.config.W, self.config.H) / 2, abs(max(self.pos, key=abs)) * margin)
             for obj in self.engine.objs:
                 pos_range = max(pos_range, abs(max(obj.pos, key=abs)) * margin)
 
             m = self.m
 
             v = cartesian2auto(self.v)
-            v_range = max(VELOCITY_MAX, vector_magnitude(self.v) * margin)
+            v_range = max(self.config.VELOCITY_MAX, vector_magnitude(self.v) * margin)
             for obj in self.engine.objs:
                 v_range = max(v_range, vector_magnitude(obj.v) * margin)
 
@@ -96,7 +96,7 @@ class Circle(object):
             self.engine.controlboxes.append(self.controlbox.tk)
 
     def setup_controllers(self, pos_range, m, v, v_range):
-        self.m_controller = Controller("Mass m", MASS_MIN, MASS_MAX, m, self.control_m)
+        self.m_controller = Controller("Mass m", self.config.MASS_MIN, self.config.MASS_MAX, m, self.control_m)
         self.pos_x_controller = Controller("Position x", -pos_range, pos_range, self.pos[0], self.control_pos)
         self.pos_y_controller = Controller("Position y", -pos_range, pos_range, self.pos[1], self.control_pos)
         self.v_rho_controller = Controller("Velocity ρ", 0, v_range, v[0], self.control_v)
@@ -134,17 +134,17 @@ class Path(object):
 
 
 class Camera2D(object):
-    def __init__(self, engine, size):
+    def __init__(self, config, engine):
+        self.config = config
         self.x = 0
         self.y = 0
-        self.z = 0
+        self.z = 100
         self.phi = 0
         self.engine = engine
         self.last_time = 0
         self.last_key = None
         self.combo = 0
-        self.size = size
-        self.center = np.array([size / 2, size / 2])
+        self.center = np.array([config.W / 2, config.H / 2])
 
     def get_coord_step(self, key, zoomed=True):
         current_time = time.time()
@@ -155,7 +155,7 @@ class Camera2D(object):
         self.last_time = current_time
         self.last_key = key
         zoom = self.get_zoom() if zoomed else 1
-        return CAMERA_COORD_STEP * CAMERA_ACCELERATION ** self.combo / zoom
+        return self.config.CAMERA_COORD_STEP * self.config.CAMERA_ACCELERATION ** self.combo / zoom
 
     def up(self, key):
         self.y -= self.get_coord_step(key)
@@ -182,18 +182,26 @@ class Camera2D(object):
         self.refresh()
 
     def rotate_left(self, key):
-        self.phi -= CAMERA_ANGLE_STEP
+        self.phi -= self.config.CAMERA_ANGLE_STEP
         self.refresh()
 
     def rotate_right(self, key):
-        self.phi += CAMERA_ANGLE_STEP
+        self.phi += self.config.CAMERA_ANGLE_STEP
         self.refresh()
 
     def refresh(self):
         self.engine.camera_changed = True
 
-    def get_zoom(self):
-        return 0.99 ** self.z
+    def get_zoom(self, z=0, allow_invisible=False):
+        distance = self.z - z
+        if allow_invisible:
+            if distance == 0:
+                distance = 1e-10
+            elif distance < 0:
+                distance *= -1
+        elif distance <= 0:
+            raise InvisibleError
+        return 100 / distance
 
     def adjust_coord(self, c, allow_invisible=False):
         R = get_rotation_matrix(deg2rad(self.phi))
@@ -220,13 +228,14 @@ def get_rotation_matrix(x, dir=1):
 
 
 class Engine2D(object):
-    def __init__(self, canvas, size, on_key_press):
+    def __init__(self, config, canvas, on_key_press):
+        self.config = config
         self.canvas = canvas
         self.objs = []
         self.animating = False
         self.controlboxes = []
         self.paths = []
-        self.camera = Camera2D(self, size)
+        self.camera = Camera2D(config, self)
         self.on_key_press = on_key_press
         self.camera_changed = False
         self.fps_last_time = time.time()
@@ -287,7 +296,7 @@ class Engine2D(object):
                 c = [0, 0, 0, 0]
             self.paths.append(Path(self.canvas.create_line(c[0], c[1], c[2], c[3], fill="grey"), obj))
             obj.prev_pos = np.copy(obj.pos)
-            if len(self.paths) > MAX_PATHS:
+            if len(self.paths) > self.config.MAX_PATHS:
                 self.canvas.delete(self.paths[0].tag)
                 self.paths = self.paths[1:]
 
@@ -319,18 +328,18 @@ class Engine2D(object):
     def create_object(self, x, y, m=None, v=None, color=None, controlbox=True):
         pos = np.array(self.camera.actual_point(x, y))
         if not m:
-            max_r = Circle.get_r_from_m(MASS_MAX)
+            max_r = Circle.get_r_from_m(self.config.MASS_MAX)
             for obj in self.objs:
                 max_r = min(max_r, (vector_magnitude(obj.pos - pos) - obj.get_r()) / 1.5)
-            m = Circle.get_m_from_r(random.randrange(Circle.get_r_from_m(MASS_MIN), int(max_r)))
+            m = Circle.get_m_from_r(random.randrange(Circle.get_r_from_m(self.config.MASS_MIN), int(max_r)))
         if not v:
-            v = np.array(polar2cartesian(random.randrange(VELOCITY_MAX / 2), random.randrange(-180, 180)))
+            v = np.array(polar2cartesian(random.randrange(self.config.VELOCITY_MAX / 2), random.randrange(-180, 180)))
         if not color:
             rand256 = lambda: random.randint(0, 255)
             color = '#%02X%02X%02X' % (rand256(), rand256(), rand256())
         tag = "circle%d" % len(self.objs)
         dir_tag = tag + "_dir"
-        obj = Circle(m, pos, v, color, tag, dir_tag, self, controlbox)
+        obj = Circle(self.config, m, pos, v, color, tag, dir_tag, self, controlbox)
         self.objs.append(obj)
         self.draw_object(obj)
         self.draw_direction(obj)

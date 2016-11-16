@@ -1,7 +1,7 @@
 from __future__ import division
 import Tkinter
 
-from config import *
+import preset
 from engine2d import Engine2D
 from engine3d import Engine3D
 from util import *
@@ -21,12 +21,19 @@ keymap = {
 }
 
 
+class Map(dict):
+    def __getattr__(self, attr):
+        return self.get(attr)
+
+
 class Simulator:
     def __init__(self, preset):
+        global config
+        config = Map(preset({}))
         self.tk = Tkinter.Tk()
-        self.tk.title(TITLE)
-        self.canvas = Tkinter.Canvas(self.tk, bg=BACKGROUND, width=SIZE, height=SIZE)
-        preset(self, SIZE, on_key_press, Engine2D=Engine2D, Engine3D=Engine3D)
+        self.tk.title(config.TITLE)
+        self.canvas = Tkinter.Canvas(self.tk, bg=config.BACKGROUND, width=config.W, height=config.H)
+        self.engine = (Engine2D if config.DIMENSION == 2 else Engine3D)(config, self.canvas, on_key_press)
         self.tk.bind("<Key>", on_key_press)
         self.canvas.bind("<Button-1>", on_click)
         self.canvas.pack()
@@ -57,14 +64,14 @@ def on_key_press(event):
     if char == ' ':
         engine.destroy_controlboxes()
         engine.animating = not engine.animating
-        simulator.tk.title("%s (%s)" % (TITLE, "Simulating" if engine.animating else "Paused"))
+        simulator.tk.title("%s (%s)" % (config.TITLE, "Simulating" if engine.animating else "Paused"))
     elif char in keymap and hasattr(engine.camera, keymap[char]):
         getattr(engine.camera, keymap[char])(char)
 
 
 def main():
     global simulator
-    simulator = Simulator(PRESET)
+    simulator = Simulator(preset.DEFAULT)
     simulator.animate()
     Tkinter.mainloop()
 

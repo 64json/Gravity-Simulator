@@ -10,10 +10,10 @@ class Sphere(Circle):
     https://en.wikipedia.org/wiki/Spherical_coordinate_system
     """
 
-    def __init__(self, m, pos, v, color, tag, dir_tag, engine, controlbox):
+    def __init__(self, config, m, pos, v, color, tag, dir_tag, engine, controlbox):
         self.pos_z_controller = None
         self.v_theta_controller = None
-        super(Sphere, self).__init__(m, pos, v, color, tag, dir_tag, engine, controlbox)
+        super(Sphere, self).__init__(config, m, pos, v, color, tag, dir_tag, engine, controlbox)
 
     def get_r(self):
         return Sphere.get_r_from_m(self.m)
@@ -56,10 +56,9 @@ class Sphere(Circle):
 
 
 class Camera3D(Camera2D):
-    def __init__(self, engine, size):
-        super(Camera3D, self).__init__(engine, size)
+    def __init__(self, config, engine):
+        super(Camera3D, self).__init__(config, engine)
         self.theta = 0
-        self.z = 100
 
     def get_coord_step(self, key, zoomed=True):
         return super(Camera3D, self).get_coord_step(key, False)
@@ -73,23 +72,12 @@ class Camera3D(Camera2D):
         self.refresh()
 
     def rotate_up(self, key):
-        self.theta -= CAMERA_ANGLE_STEP
+        self.theta -= self.config.CAMERA_ANGLE_STEP
         self.refresh()
 
     def rotate_down(self, key):
-        self.theta += CAMERA_ANGLE_STEP
+        self.theta += self.config.CAMERA_ANGLE_STEP
         self.refresh()
-
-    def get_zoom(self, z, allow_invisible=False):
-        distance = self.z - z
-        if allow_invisible:
-            if distance == 0:
-                distance = 1e-10
-            elif distance < 0:
-                distance *= -1
-        elif distance <= 0:
-            raise InvisibleError
-        return 100 / distance
 
     def adjust_coord(self, c, allow_invisible=False):
         Rx = get_rotation_x_matrix(deg2rad(self.theta))
@@ -109,7 +97,7 @@ class Camera3D(Camera2D):
         Rx_ = get_rotation_x_matrix(deg2rad(self.theta), -1)
         Ry_ = get_rotation_y_matrix(deg2rad(self.phi), -1)
         c = (([x, y] - self.center) + [self.x, self.y]).tolist() + [0]
-        return (c * Rx_ * Ry_).tolist()[0]
+        return rotate(rotate(c, Ry_), Rx_)
 
 
 def get_rotation_x_matrix(x, dir=1):
@@ -143,26 +131,26 @@ def get_rotation_z_matrix(x, dir=1):
 
 
 class Engine3D(Engine2D):
-    def __init__(self, canvas, size, on_key_press):
-        super(Engine3D, self).__init__(canvas, size, on_key_press)
-        self.camera = Camera3D(self, size)
+    def __init__(self, config, canvas, on_key_press):
+        super(Engine3D, self).__init__(config, canvas, on_key_press)
+        self.camera = Camera3D(config, self)
 
     def create_object(self, x, y, m=None, v=None, color=None, controlbox=True):
         pos = np.array(self.camera.actual_point(x, y))
         if not m:
-            max_r = Sphere.get_r_from_m(MASS_MAX)
+            max_r = Sphere.get_r_from_m(self.config.MASS_MAX)
             for obj in self.objs:
                 max_r = min(max_r, (vector_magnitude(obj.pos - pos) - obj.get_r()) / 1.5)
-            m = Sphere.get_m_from_r(random.randrange(Sphere.get_r_from_m(MASS_MIN), int(max_r)))
+            m = Sphere.get_m_from_r(random.randrange(Sphere.get_r_from_m(self.config.MASS_MIN), int(max_r)))
         if not v:
-            v = np.array(spherical2cartesian(random.randrange(VELOCITY_MAX / 2), random.randrange(-180, 180),
+            v = np.array(spherical2cartesian(random.randrange(self.config.VELOCITY_MAX / 2), random.randrange(-180, 180),
                                              random.randrange(-180, 180)))
         if not color:
             rand256 = lambda: random.randint(0, 255)
             color = '#%02X%02X%02X' % (rand256(), rand256(), rand256())
         tag = "sphere%d" % len(self.objs)
         dir_tag = tag + "_dir"
-        obj = Sphere(m, pos, v, color, tag, dir_tag, self, controlbox)
+        obj = Sphere(self.config, m, pos, v, color, tag, dir_tag, self, controlbox)
         self.objs.append(obj)
         self.draw_object(obj)
         self.draw_direction(obj)
