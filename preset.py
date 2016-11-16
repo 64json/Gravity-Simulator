@@ -20,7 +20,7 @@ def EMPTY_2D(c):
 def EMPTY_3D(c):
     EMPTY_2D(c).update({
         'DIMENSION': 3,
-        'G': 0.0316,
+        'G': 0.001,
         'MASS_MIN': 1,
         'MASS_MAX': 8e6,
         'VELOCITY_MAX': 10

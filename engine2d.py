@@ -344,38 +344,36 @@ class Engine2D(object):
         self.draw_object(obj)
         self.draw_direction(obj)
 
+    def get_rotation_matrix(self, angles, dir=1):
+        return get_rotation_matrix(angles[0], dir)
+
     def elastic_collision(self):
+        dimension = self.config.DIMENSION
         for i in range(0, len(self.objs)):
             o1 = self.objs[i]
             for j in range(i + 1, len(self.objs)):
                 o2 = self.objs[j]
                 collision = o2.pos - o1.pos
-                d, phi = cartesian2polar(collision[0], collision[1])
+                temp = cartesian2auto(collision)
+                d = temp[0]
+                angles = temp[1:]
 
                 if d < o1.get_r() + o2.get_r():
-                    R = get_rotation_matrix(phi)
-                    R_ = get_rotation_matrix(phi, -1)
+                    R = self.get_rotation_matrix(angles)
+                    R_ = self.get_rotation_matrix(angles, -1)
 
-                    v_temp = [[0, 0], [0, 0]]
-                    v_temp[0] = rotate(o1.v, R)
-                    v_temp[1] = rotate(o2.v, R)
-                    v_final = [[0, 0], [0, 0]]
+                    v_temp = [rotate(o1.v, R), rotate(o2.v, R)]
+                    v_final = np.copy(v_temp)
                     v_final[0][0] = ((o1.m - o2.m) * v_temp[0][0] + 2 * o2.m * v_temp[1][0]) / (o1.m + o2.m)
-                    v_final[0][1] = v_temp[0][1]
                     v_final[1][0] = ((o2.m - o1.m) * v_temp[1][0] + 2 * o1.m * v_temp[0][0]) / (o1.m + o2.m)
-                    v_final[1][1] = v_temp[1][1]
                     o1.v = rotate(v_final[0], R_)
                     o2.v = rotate(v_final[1], R_)
 
-                    pos_temp = [[0, 0], [0, 0]]
-                    pos_temp[1] = rotate(collision, R)
+                    pos_temp = [[0] * dimension, rotate(collision, R)]
                     pos_temp[0][0] += v_final[0][0]
                     pos_temp[1][0] += v_final[1][0]
-                    pos_final = [[0, 0], [0, 0]]
-                    pos_final[0] = rotate(pos_temp[0], R_)
-                    pos_final[1] = rotate(pos_temp[1], R_)
-                    o1.pos = o1.pos + pos_final[0]
-                    o2.pos = o1.pos + pos_final[1]
+                    o1.pos = o1.pos + rotate(pos_temp[0], R_)
+                    o2.pos = o1.pos + rotate(pos_temp[1], R_)
 
     def calculate_all(self):
         for obj in self.objs:

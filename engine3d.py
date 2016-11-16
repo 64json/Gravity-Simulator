@@ -143,8 +143,9 @@ class Engine3D(Engine2D):
                 max_r = min(max_r, (vector_magnitude(obj.pos - pos) - obj.get_r()) / 1.5)
             m = Sphere.get_m_from_r(random.randrange(Sphere.get_r_from_m(self.config.MASS_MIN), int(max_r)))
         if not v:
-            v = np.array(spherical2cartesian(random.randrange(self.config.VELOCITY_MAX / 2), random.randrange(-180, 180),
-                                             random.randrange(-180, 180)))
+            v = np.array(
+                spherical2cartesian(random.randrange(self.config.VELOCITY_MAX / 2), random.randrange(-180, 180),
+                                    random.randrange(-180, 180)))
         if not color:
             rand256 = lambda: random.randint(0, 255)
             color = '#%02X%02X%02X' % (rand256(), rand256(), rand256())
@@ -155,37 +156,6 @@ class Engine3D(Engine2D):
         self.draw_object(obj)
         self.draw_direction(obj)
 
-    def elastic_collision(self):
-        for i in range(0, len(self.objs)):
-            o1 = self.objs[i]
-            for j in range(i + 1, len(self.objs)):
-                o2 = self.objs[j]
-                collision = o2.pos - o1.pos
-                d, phi, theta = cartesian2spherical(collision[0], collision[1], collision[2])
-
-                if d < o1.get_r() + o2.get_r():
-                    R = get_rotation_z_matrix(phi) * get_rotation_x_matrix(theta)
-                    R_ = get_rotation_x_matrix(theta, -1) * get_rotation_z_matrix(phi, -1)
-
-                    v_temp = [[0, 0, 0], [0, 0, 0]]
-                    v_temp[0] = rotate(o1.v, R)
-                    v_temp[1] = rotate(o2.v, R)
-                    v_final = [[0, 0, 0], [0, 0, 0]]
-                    v_final[0][0] = ((o1.m - o2.m) * v_temp[0][0] + 2 * o2.m * v_temp[1][0]) / (o1.m + o2.m)
-                    v_final[0][1] = v_temp[0][1]
-                    v_final[0][2] = v_temp[0][2]
-                    v_final[1][0] = ((o2.m - o1.m) * v_temp[1][0] + 2 * o1.m * v_temp[0][0]) / (o1.m + o2.m)
-                    v_final[1][1] = v_temp[1][1]
-                    v_final[1][2] = v_temp[1][2]
-                    o1.v = rotate(v_final[0], R_)
-                    o2.v = rotate(v_final[1], R_)
-
-                    pos_temp = [[0, 0, 0], [0, 0, 0]]
-                    pos_temp[1] = rotate(collision, R)
-                    pos_temp[0][0] += v_final[0][0]
-                    pos_temp[1][0] += v_final[1][0]
-                    pos_final = [[0, 0, 0], [0, 0, 0]]
-                    pos_final[0] = rotate(pos_temp[0], R_)
-                    pos_final[1] = rotate(pos_temp[1], R_)
-                    o1.pos = o1.pos + pos_final[0]
-                    o2.pos = o1.pos + pos_final[1]
+    def get_rotation_matrix(self, angles, dir=1):
+        return get_rotation_z_matrix(angles[0]) * get_rotation_x_matrix(angles[1]) if dir == 1 else \
+            get_rotation_x_matrix(angles[1], -1) * get_rotation_z_matrix(angles[0], -1)
