@@ -187,9 +187,7 @@ class Camera2D(object):
         self.refresh()
 
     def refresh(self):
-        if not self.engine.animating:
-            self.engine.redraw_all()
-        self.engine.move_paths()
+        self.engine.camera_changed = True
 
     def get_zoom(self):
         return 0.99 ** self.z
@@ -228,18 +226,23 @@ class Engine2D(object):
         self.paths = []
         self.camera = Camera2D(self, size)
         self.on_key_press = on_key_press
+        self.camera_changed = False
 
-    def animate(self):
+    def destroy_controlboxes(self):
         for controlbox in self.controlboxes:
             try:
                 controlbox.destroy()
             except Tkinter.TclError:
                 pass
         self.controlboxes = []
-        self.calculate_all()
-        self.redraw_all()
+
+    def animate(self):
+        if self.camera_changed:
+            self.move_paths()
         if self.animating:
-            self.canvas.after(10, self.animate)
+            self.calculate_all()
+        self.redraw_all()
+        self.canvas.after(10, self.animate)
 
     def object_coords(self, obj):
         r = self.camera.adjust_magnitude(obj.pos, obj.get_r())

@@ -31,6 +31,9 @@ class Simulator:
         self.canvas.bind("<Button-1>", on_click)
         self.canvas.pack()
 
+    def animate(self):
+        self.engine.animate()
+
 
 def on_click(event):
     engine = simulator.engine
@@ -52,9 +55,9 @@ def on_key_press(event):
     engine = simulator.engine
     char = event.char
     if char == ' ':
+        engine.destroy_controlboxes()
         engine.animating = not engine.animating
         simulator.tk.title("%s (%s)" % (TITLE, "Simulating" if engine.animating else "Paused"))
-        engine.animate()
     elif char in keymap and hasattr(engine.camera, keymap[char]):
         getattr(engine.camera, keymap[char])(char)
 
@@ -62,6 +65,7 @@ def on_key_press(event):
 def main():
     global simulator
     simulator = Simulator(PRESET)
+    simulator.animate()
     Tkinter.mainloop()
 
 
