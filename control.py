@@ -14,9 +14,6 @@ class Controller:
 
 
 class ControlBox:
-    def show_values(self):
-        print (self.w1.get(), self.w2.get())
-
     def __init__(self, title, controllers, on_key_press):
         self.tk = Tkinter.Tk()
         self.tk.title(title)

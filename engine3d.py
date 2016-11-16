@@ -112,16 +112,34 @@ class Camera3D(Camera2D):
         return (c * Rx_ * Ry_).tolist()[0]
 
 
-def get_rotation_x_matrix(theta, dir=1):
-    sin = math.sin(theta)
-    cos = math.cos(theta)
-    return np.matrix([[1, 0, 0], [0, cos, dir * -sin], [0, dir * sin, cos]])
+def get_rotation_x_matrix(x, dir=1):
+    sin = math.sin(x * dir)
+    cos = math.cos(x * dir)
+    return np.matrix([
+        [1, 0, 0],
+        [0, cos, -sin],
+        [0, sin, cos]
+    ])
 
 
-def get_rotation_y_matrix(phi, dir=1):
-    sin = math.sin(phi)
-    cos = math.cos(phi)
-    return np.matrix([[cos, 0, dir * -sin], [0, 1, 0], [dir * sin, 0, cos]])
+def get_rotation_y_matrix(x, dir=1):
+    sin = math.sin(x * dir)
+    cos = math.cos(x * dir)
+    return np.matrix([
+        [cos, 0, -sin],
+        [0, 1, 0],
+        [sin, 0, cos]
+    ])
+
+
+def get_rotation_z_matrix(x, dir=1):
+    sin = math.sin(x * dir)
+    cos = math.cos(x * dir)
+    return np.matrix([
+        [cos, -sin, 0],
+        [sin, cos, 0],
+        [0, 0, 1]
+    ])
 
 
 class Engine3D(Engine2D):
@@ -155,20 +173,15 @@ class Engine3D(Engine2D):
             for j in range(i + 1, len(self.objs)):
                 o2 = self.objs[j]
                 collision = o2.pos - o1.pos
-                d = vector_magnitude(collision)
+                d, phi, theta = cartesian2spherical(collision[0], collision[1], collision[2])
 
                 if d < o1.get_r() + o2.get_r():
-                    phi = math.atan2(collision[1], collision[0])
-                    rho = math.sqrt(collision[0] ** 2 + collision[1] ** 2 + collision[2] ** 2)
-                    theta = math.acos(collision[2] / rho) if rho != 0 else 0
-                    Rx = get_rotation_x_matrix(theta)
-                    Rx_ = get_rotation_x_matrix(theta, -1)
-                    Ry = get_rotation_y_matrix(phi)
-                    Ry_ = get_rotation_y_matrix(phi, -1)
+                    R = get_rotation_z_matrix(phi) * get_rotation_x_matrix(theta)
+                    R_ = get_rotation_x_matrix(theta, -1) * get_rotation_z_matrix(phi, -1)
 
                     v_temp = [[0, 0, 0], [0, 0, 0]]
-                    v_temp[0] = rotate(rotate(o1.v, Rx), Ry)
-                    v_temp[1] = rotate(rotate(o2.v, Rx), Ry)
+                    v_temp[0] = rotate(o1.v, R)
+                    v_temp[1] = rotate(o2.v, R)
                     v_final = [[0, 0, 0], [0, 0, 0]]
                     v_final[0][0] = ((o1.m - o2.m) * v_temp[0][0] + 2 * o2.m * v_temp[1][0]) / (o1.m + o2.m)
                     v_final[0][1] = v_temp[0][1]
@@ -176,28 +189,15 @@ class Engine3D(Engine2D):
                     v_final[1][0] = ((o2.m - o1.m) * v_temp[1][0] + 2 * o1.m * v_temp[0][0]) / (o1.m + o2.m)
                     v_final[1][1] = v_temp[1][1]
                     v_final[1][2] = v_temp[1][2]
-                    o1.v = np.array(rotate(rotate(v_final[0], Rx_), Ry_))
-                    o2.v = np.array(rotate(rotate(v_final[1], Rx_), Ry_))
+                    o1.v = rotate(v_final[0], R_)
+                    o2.v = rotate(v_final[1], R_)
 
                     pos_temp = [[0, 0, 0], [0, 0, 0]]
-                    pos_temp[1] = rotate(rotate(collision, Rx), Ry)
+                    pos_temp[1] = rotate(collision, R)
                     pos_temp[0][0] += v_final[0][0]
                     pos_temp[1][0] += v_final[1][0]
                     pos_final = [[0, 0, 0], [0, 0, 0]]
-                    pos_final[0] = rotate(rotate(pos_temp[0], Rx_), Ry_)
-                    pos_final[1] = rotate(rotate(pos_temp[1], Rx_), Ry_)
+                    pos_final[0] = rotate(pos_temp[0], R_)
+                    pos_final[1] = rotate(pos_temp[1], R_)
                     o1.pos = o1.pos + pos_final[0]
                     o2.pos = o1.pos + pos_final[1]
-
-    def calculate_all(self):
-        for obj in self.objs:
-            obj.calculate_velocity()
-
-        self.elastic_collision()
-
-        for obj in self.objs:
-            obj.calculate_position()
-
-    def redraw_all(self):
-        for obj in self.objs:
-            obj.redraw()

@@ -195,7 +195,7 @@ class Camera2D(object):
     def get_zoom(self):
         return 0.99 ** self.z
 
-    def adjust_coord(self, c):
+    def adjust_coord(self, c, allow_invisible=False):
         R = get_rotation_matrix(deg2rad(self.phi))
         zoom = self.get_zoom()
         return self.center + (rotate(c, R) - [self.x, self.y]) * zoom
@@ -210,10 +210,13 @@ class Camera2D(object):
         return rotate(([x, y] - self.center) / zoom + [self.x, self.y], R_)
 
 
-def get_rotation_matrix(phi, dir=1):
-    sin = math.sin(phi)
-    cos = math.cos(phi)
-    return np.matrix([[cos, dir * -sin], [dir * sin, cos]])
+def get_rotation_matrix(x, dir=1):
+    sin = math.sin(x * dir)
+    cos = math.cos(x * dir)
+    return np.matrix([
+        [cos, -sin],
+        [sin, cos]
+    ])
 
 
 class Engine2D(object):
@@ -338,10 +341,9 @@ class Engine2D(object):
             for j in range(i + 1, len(self.objs)):
                 o2 = self.objs[j]
                 collision = o2.pos - o1.pos
-                d = vector_magnitude(collision)
+                d, phi = cartesian2polar(collision[0], collision[1])
 
                 if d < o1.get_r() + o2.get_r():
-                    phi = math.atan2(collision[1], collision[0])
                     R = get_rotation_matrix(phi)
                     R_ = get_rotation_matrix(phi, -1)
 
