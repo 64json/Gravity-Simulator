@@ -60,17 +60,6 @@ class Camera3D(Camera2D):
         super(Camera3D, self).__init__(config, engine)
         self.theta = 0
 
-    def get_coord_step(self, key, zoomed=True):
-        return super(Camera3D, self).get_coord_step(key, False)
-
-    def zoom_in(self, key):
-        self.z -= self.get_coord_step(key) / 5
-        self.refresh()
-
-    def zoom_out(self, key):
-        self.z += self.get_coord_step(key) / 5
-        self.refresh()
-
     def rotate_up(self, key):
         self.theta -= self.config.CAMERA_ANGLE_STEP
         self.refresh()

@@ -146,7 +146,7 @@ class Camera2D(object):
         self.combo = 0
         self.center = np.array([config.W / 2, config.H / 2])
 
-    def get_coord_step(self, key, zoomed=True):
+    def get_coord_step(self, key):
         current_time = time.time()
         if key == self.last_key and current_time - self.last_time < 1:
             self.combo += 1
@@ -154,7 +154,7 @@ class Camera2D(object):
             self.combo = 0
         self.last_time = current_time
         self.last_key = key
-        zoom = self.get_zoom() if zoomed else 1
+        zoom = self.get_zoom()
         return self.config.CAMERA_COORD_STEP * self.config.CAMERA_ACCELERATION ** self.combo / zoom
 
     def up(self, key):
@@ -174,11 +174,11 @@ class Camera2D(object):
         self.refresh()
 
     def zoom_in(self, key):
-        self.z -= self.get_coord_step(key, False)
+        self.z -= self.get_coord_step(key)
         self.refresh()
 
     def zoom_out(self, key):
-        self.z += self.get_coord_step(key, False)
+        self.z += self.get_coord_step(key)
         self.refresh()
 
     def rotate_left(self, key):
