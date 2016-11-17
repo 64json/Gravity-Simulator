@@ -9,4 +9,7 @@ RSVP.on('error', function (reason) {
 
 extend(true, app, new App());
 
+const simulator = Simulator(preset.DEFAULT);
+simulator.animate();
+
 extend(true, window, {});
