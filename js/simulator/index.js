@@ -3,6 +3,7 @@ const Engine2D = require('./engine/2d');
 const Engine3D = require('./engine/3d');
 const {} = require('./util');
 
+
 let config = {};
 const keymap = {
     '\uf700': 'up',
@@ -16,7 +17,6 @@ const keymap = {
     'a': 'rotate_left',
     'd': 'rotate_right'
 };
-
 
 class Simulator {
     constructor(preset) {

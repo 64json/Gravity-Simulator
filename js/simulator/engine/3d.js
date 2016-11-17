@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-
-from __future__ import division
-
-from engine2d import *
+const Engine2D = require('./2d');
 
 
 class Sphere(Circle):

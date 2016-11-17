@@ -2,7 +2,6 @@ const app = require('./app');
 const App = require('./app/constructor');
 const preset = require('./preset');
 const Simulator = require('./simulator');
-
 const {extend} = $;
 
 // set global promise error handler
