@@ -72,3 +72,12 @@ function random(min, max=null) {
 function rand_color() {
     return '#' + Math.floor(Math.random()*16777215).toString(16);
 }
+
+function get_rotation_matrix(x, dir = 1) {
+    const sin = Math.sin(x * dir);
+    const cos = Math.cos(x * dir);
+    return np.matrix([
+        [cos, -sin],
+        [sin, cos]
+    ]);
+}
