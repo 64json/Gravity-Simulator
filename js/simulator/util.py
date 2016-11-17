@@ -56,3 +56,19 @@ def c2d():
 
 def rotate(vector, matrix):
     return (vector * matrix).getA()[0]
+
+function now() {
+    return new Date().getTime() / 1000;
+}
+
+function random(min, max=null) {
+    if (max == null) {
+        max = min;
+        min = 0;
+    }
+    return Math.random() * (max - min) + min;
+}
+
+function rand_color() {
+    return '#' + Math.floor(Math.random()*16777215).toString(16);
+}

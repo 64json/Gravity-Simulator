@@ -128,7 +128,7 @@ class Circle(object):
 
 class Path(object):
     def __init__(self, tag, obj):
-        self.tag = tag,
+        self.tag = tag
         self.prev_pos = np.copy(obj.prev_pos)
         self.pos = np.copy(obj.pos)
 
