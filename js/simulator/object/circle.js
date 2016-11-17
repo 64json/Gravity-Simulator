@@ -14,7 +14,7 @@ class Circle {
         this.config = config;
         this.m = m;
         this.pos = pos;
-        this.prev_pos = nj.copy(pos);
+        this.prev_pos = pos.slice();
         this.v = v;
         this.color = color;
         this.tag = tag;
@@ -32,41 +32,38 @@ class Circle {
     }
 
     calculate_velocity() {
-        let F = 0;
+        let F = nj.zeros(this.config.DIMENSION);
         for (const obj of this.engine.objs) {
             if (obj == this) continue;
-            const vector = this.pos - obj.pos;
+            const vector = this.pos.subtract(obj.pos);
             const magnitude = vector_magnitude(vector);
-            const unit_vector = vector / magnitude;
-            F += obj.m / square(magnitude) * unit_vector
+            const unit_vector = vector.divide(magnitude);
+            F = F.add(unit_vector.multiply(obj.m / square(magnitude)))
         }
-        F *= -this.config.G * this.m;
-        const a = F / this.m;
-        this.v += a
+        F = F.multiply(-this.config.G * this.m);
+        const a = F.divide(this.m);
+        this.v = this.v.add(a);
     }
 
     calculate_position() {
-        this.pos += this.v
+        this.pos = this.pos.add(this.v);
     }
 
     control_m(e) {
         const m = this.m_controller.get();
         this.m = m;
-        this.redraw();
     }
 
     control_pos(e) {
         const x = this.pos_x_controller.get();
         const y = this.pos_y_controller.get();
         this.pos = nj.array([x, y]);
-        this.redraw();
     }
 
     control_v(e) {
         const phi = deg2rad(this.v_phi_controller.get());
         const rho = this.v_rho_controller.get();
         this.v = nj.array(polar2cartesian(rho, phi));
-        this.redraw();
     }
 
     show_controlbox() {
@@ -75,9 +72,9 @@ class Circle {
         } catch (e) {
             const margin = 1.5;
 
-            var pos_range = max(max(this.config.W, this.config.H) / 2, max.apply(null, this.pos.map(Math.abs)) * margin);
+            var pos_range = max(max(this.config.W, this.config.H) / 2, max.apply(null, this.pos.tolist().map(Math.abs)) * margin);
             for (const obj of this.engine.objs) {
-                pos_range = max(pos_range, max.apply(null, obj.pos.map(Math.abs)) * margin);
+                pos_range = max(pos_range, max.apply(null, obj.pos.tolist().map(Math.abs)) * margin);
             }
 
             const m = this.m;
@@ -89,17 +86,17 @@ class Circle {
             }
 
             this.setup_controllers(pos_range, m, v, v_range);
-            this.controlbox = ControlBox(this.tag, this.get_controllers());
-            this.engine.controlboxes.append(this.controlbox.tk)
+            this.controlbox = new ControlBox(this.tag, this.get_controllers());
+            this.engine.controlboxes.push(this.controlbox);
         }
     }
 
     setup_controllers(pos_range, m, v, v_range) {
-        this.m_controller = Controller("Mass m", this.config.MASS_MIN, this.config.MASS_MAX, m, this.control_m);
-        this.pos_x_controller = Controller("Position x", -pos_range, pos_range, this.pos[0], this.control_pos);
-        this.pos_y_controller = Controller("Position y", -pos_range, pos_range, this.pos[1], this.control_pos);
-        this.v_rho_controller = Controller("Velocity ρ", 0, v_range, v[0], this.control_v);
-        this.v_phi_controller = Controller("Velocity φ", -180, 180, rad2deg(v[1]), this.control_v);
+        this.m_controller = new Controller("Mass m", this.config.MASS_MIN, this.config.MASS_MAX, m, this.control_m);
+        this.pos_x_controller = new Controller("Position x", -pos_range, pos_range, this.pos[0], this.control_pos);
+        this.pos_y_controller = new Controller("Position y", -pos_range, pos_range, this.pos[1], this.control_pos);
+        this.v_rho_controller = new Controller("Velocity ρ", 0, v_range, v[0], this.control_v);
+        this.v_phi_controller = new Controller("Velocity φ", -180, 180, rad2deg(v[1]), this.control_v);
     }
 
     get_controllers() {
@@ -110,12 +107,6 @@ class Circle {
             this.v_rho_controller,
             this.v_phi_controller
         ];
-    }
-
-    redraw() {
-        this.engine.move_object(this);
-        this.engine.move_direction(this);
-        this.engine.draw_path(this);
     }
 
     static get_r_from_m(m) {

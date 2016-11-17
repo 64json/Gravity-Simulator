@@ -6,9 +6,9 @@ const {min} = Math;
 
 
 class Engine3D extends Engine2D {
-    constructor(config, canvas) {
-        super(config, canvas);
-        this.camera = Camera3D(config, this);
+    constructor(config, ctx) {
+        super(config, ctx);
+        this.camera = new Camera3D(config, this);
     }
 
 
@@ -32,8 +32,8 @@ class Engine3D extends Engine2D {
         }
         const tag = `sphere${this.objs.length}`;
         const dir_tag = tag + "_dir";
-        const obj = Sphere(this.config, m, pos, v, color, tag, dir_tag, this, controlbox);
-        this.objs.append(obj);
+        const obj = new Sphere(this.config, m, pos, v, color, tag, dir_tag, this, controlbox);
+        this.objs.push(obj);
         this.draw_object(obj);
         this.draw_direction(obj);
     }

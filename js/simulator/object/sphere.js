@@ -20,7 +20,6 @@ class Sphere extends Circle {
         const y = this.pos_y_controller.get();
         const z = this.pos_z_controller.get();
         this.pos = nj.array([x, y, z]);
-        this.redraw();
     }
 
     control_v(e) {
@@ -28,13 +27,12 @@ class Sphere extends Circle {
         const theta = deg2rad(this.v_theta_controller.get());
         const rho = this.v_rho_controller.get();
         this.v = nj.array(spherical2cartesian(rho, phi, theta));
-        this.redraw();
     }
 
     setup_controllers(pos_range, m, v, v_range) {
         super.setup_controllers(pos_range, m, v, v_range);
-        this.pos_z_controller = Controller("Position z", -pos_range, pos_range, this.pos[2], this.control_pos);
-        this.v_theta_controller = Controller("Velocity θ", -180, 180, rad2deg(v[2]), this.control_v);
+        this.pos_z_controller = new Controller("Position z", -pos_range, pos_range, this.pos[2], this.control_pos);
+        this.v_theta_controller = new Controller("Velocity θ", -180, 180, rad2deg(v[2]), this.control_v);
     }
 
     get_controllers() {

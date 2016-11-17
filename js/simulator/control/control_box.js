@@ -15,3 +15,5 @@ class ControlBox {
         this.$controlBox.remove();
     }
 }
+
+module.exports = ControlBox;

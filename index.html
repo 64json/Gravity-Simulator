@@ -4,15 +4,30 @@
 <head>
     <meta charset="utf-8">
 
-    <title>The HTML5 Herald</title>
+    <title>Gravity Simulator</title>
     <meta name="description" content="Gravity Simulator">
     <meta name="author" content="Jason Park">
 
+    <script src="public/jquery-3.1.1.min.js"></script>
+    <script src="public/numjs.min.js"></script>
+
     <style>
+        html, body {
+            padding: 0;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+        }
+
         .template {
             display: none;
             padding: 16px;
             background: grey;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>

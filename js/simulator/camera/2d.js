@@ -69,7 +69,6 @@ class Camera2D {
     }
 
     refresh() {
-        this.engine.camera_changed = true;
     }
 
     get_zoom(z = 0, allow_invisible = false) {
@@ -95,7 +94,7 @@ class Camera2D {
     actual_point(x, y) {
         const R_ = get_rotation_matrix(deg2rad(this.phi), -1);
         const zoom = this.get_zoom();
-        return rotate(([x, y] - this.center) / zoom + [this.x, this.y], R_);
+        return rotate((nj.array([x, y]).subtract(this.center)).divide(zoom).add([this.x, this.y]), R_);
     }
 }
 

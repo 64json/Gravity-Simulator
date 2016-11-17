@@ -4,8 +4,6 @@ const {extend} = $;
 function EMPTY_2D(c) {
     return extend(true, c, {
         'TITLE': 'Gravity Simulator',
-        'W': 1000,
-        'H': 750,
         'BACKGROUND': "white",
         'DIMENSION': 2,
         'MAX_PATHS': 1000,

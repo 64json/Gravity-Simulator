@@ -39,17 +39,17 @@ const Util = {
     },
 
     cartesian2auto: (vector) => {
-        return vector.length == 2
-            ? cartesian2polar(vector[0], vector[1])
-            : cartesian2spherical(vector[0], vector[1], vector[2]);
+        return vector.size == 2
+            ? Util.cartesian2polar(vector.get(0), vector.get(1))
+            : Util.cartesian2spherical(vector.get(0), vector.get(1), vector.get(2));
     },
 
     rad2deg: (rad) => {
-        return rad / Math.pi * 180;
+        return rad / Math.PI * 180;
     },
 
     deg2rad: (deg) => {
-        return deg / 180 * Math.pi;
+        return deg / 180 * Math.PI;
     },
 
     get_distance: (x0, y0, x1, y1) => {
@@ -57,7 +57,7 @@ const Util = {
     },
 
     vector_magnitude: (vector) => {
-        return nj.linalg.norm(vector);
+        return vector.pow(2).tolist().reduce((a, b) => a + b, 0);
     },
 
     c2d: () => {
@@ -65,7 +65,7 @@ const Util = {
     },
 
     rotate: (vector, matrix) => {
-        return (vector * matrix).getA()[0];
+        return vector.dot(matrix);
     },
 
     now: () => {
@@ -87,7 +87,7 @@ const Util = {
     get_rotation_matrix: (x, dir = 1) => {
         const sin = Math.sin(x * dir);
         const cos = Math.cos(x * dir);
-        return nj.matrix([
+        return nj.array([
             [cos, -sin],
             [sin, cos]
         ]);
@@ -96,7 +96,7 @@ const Util = {
     get_rotation_x_matrix: (x, dir = 1) => {
         const sin = Math.sin(x * dir);
         const cos = Math.cos(x * dir);
-        return nj.matrix([
+        return nj.array([
             [1, 0, 0],
             [0, cos, -sin],
             [0, sin, cos]
@@ -106,7 +106,7 @@ const Util = {
     get_rotation_y_matrix: (x, dir = 1) => {
         const sin = Math.sin(x * dir);
         const cos = Math.cos(x * dir);
-        return nj.matrix([
+        return nj.array([
             [cos, 0, -sin],
             [0, 1, 0],
             [sin, 0, cos]
@@ -116,7 +116,7 @@ const Util = {
     get_rotation_z_matrix: (x, dir = 1) => {
         const sin = Math.sin(x * dir);
         const cos = Math.cos(x * dir);
-        return nj.matrix([
+        return nj.array([
             [cos, -sin, 0],
             [sin, cos, 0],
             [0, 0, 1]

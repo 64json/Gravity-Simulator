@@ -1,28 +1,26 @@
 const Circle = require('../object/circle');
 const Camera2D = require('../camera/2d');
 const InvisibleError = require('../error/invisible');
-const {vector_magnitude, rotate, now, random, polar2cartesian, rand_color, get_rotation_matrix} = require('../util');
+const {vector_magnitude, rotate, now, random, polar2cartesian, rand_color, get_rotation_matrix, cartesian2auto} = require('../util');
 const {min} = Math;
 
 
 class Path {
-    constructor(tag, obj) {
-        this.tag = tag;
-        this.prev_pos = nj.copy(obj.prev_pos);
-        this.pos = nj.copy(obj.pos);
+    constructor(obj) {
+        this.prev_pos = obj.prev_pos.slice();
+        this.pos = obj.pos.slice();
     }
 }
 
 class Engine2D {
-    constructor(config, canvas) {
+    constructor(config, ctx) {
         this.config = config;
-        this.canvas = canvas;
+        this.ctx = ctx;
         this.objs = [];
         this.animating = false;
         this.controlboxes = [];
         this.paths = [];
-        this.camera = Camera2D(config, this);
-        this.camera_changed = false;
+        this.camera = new Camera2D(config, this);
         this.fps_last_time = now();
         this.fps_count = 0;
     }
@@ -36,21 +34,19 @@ class Engine2D {
 
     animate() {
         this.print_fps();
-        if (this.camera_changed) {
-            this.camera_changed = false;
-            this.move_paths();
-        }
         if (this.animating) {
             this.calculate_all();
         }
         this.redraw_all();
-        this.canvas.after(10, this.animate);
+        setTimeout(() => {
+            this.animate();
+        }, 10);
     }
 
     object_coords(obj) {
         const r = this.camera.adjust_radius(obj.pos, obj.get_r());
-        [x, y] = this.camera.adjust_coord(obj.pos);
-        return [x - r, y - r, x + r, y + r];
+        const [x, y] = this.camera.adjust_coord(obj.pos);
+        return [x, y, r];
     }
 
     direction_coords(obj) {
@@ -66,104 +62,67 @@ class Engine2D {
     }
 
     draw_object(obj) {
-        let c;
         try {
-            c = this.object_coords(obj);
+            const c = this.object_coords(obj);
+            this.ctx.beginPath();
+            this.ctx.arc(c[0], c[1], c[2], 0, 2 * Math.PI, false);
+            this.ctx.fillStyle = obj.color;
+            this.ctx.fill();
         } catch (e) {
-            if (e instanceof InvisibleError) {
-                c = [0, 0, 0, 0];
-            } else {
+            if (!(e instanceof InvisibleError)) {
                 throw e;
             }
         }
-        return this.canvas.create_oval(c[0], c[1], c[2], c[3], fill = obj.color, tag = obj.tag, width = 0);
     }
 
     draw_direction(obj) {
-        let c;
         try {
-            c = this.object_coords(obj);
+            const c = this.object_coords(obj);
+            this.ctx.beginPath();
+            this.ctx.moveTo(c[0], c[1]);
+            this.ctx.lineTo(c[2], c[3]);
+            this.ctx.strokeStyle = '#000000';
+            this.ctx.stroke();
         } catch (e) {
-            if (e instanceof InvisibleError) {
-                c = [0, 0, 0, 0];
-            } else {
+            if (!(e instanceof InvisibleError)) {
                 throw e;
             }
         }
-        return this.canvas.create_line(c[0], c[1], c[2], c[3], fill = "black", tag = obj.dir_tag);
     }
 
-    draw_path(obj) {
-        if (vector_magnitude(obj.pos - obj.prev_pos) > 5) {
-            let c;
+    draw_paths() {
+        for (const path of this.paths) {
             try {
-                c = this.object_coords(obj);
+                const c = this.path_coords(path);
+                this.ctx.beginPath();
+                this.ctx.moveTo(c[0], c[1]);
+                this.ctx.lineTo(c[2], c[3]);
+                this.ctx.strokeStyle = '#dddddd';
+                this.ctx.stroke();
             } catch (e) {
-                if (e instanceof InvisibleError) {
-                    c = [0, 0, 0, 0];
-                } else {
+                if (!(e instanceof InvisibleError)) {
                     throw e;
                 }
             }
-            this.paths.append(Path(this.canvas.create_line(c[0], c[1], c[2], c[3], fill = "grey"), obj));
-            obj.prev_pos = nj.copy(obj.pos);
+        }
+    }
+
+    create_path(obj) {
+        if (vector_magnitude(obj.pos.subtract(obj.prev_pos)) > 5) {
+            this.paths.push(new Path(obj));
+            obj.prev_pos = obj.pos.slice();
             if (this.paths.length > this.config.MAX_PATHS) {
-                this.canvas.delete(this.paths[0].tag);
                 this.paths = this.paths.slice(1);
             }
         }
     }
 
-    move_object(obj) {
-        try {
-            const c = this.object_coords(obj);
-            this.canvas.coords(obj.tag, c[0], c[1], c[2], c[3]);
-            this.canvas.itemconfigure(obj.tag, state = 'normal');
-        } catch (e) {
-            if (e instanceof InvisibleError) {
-                this.canvas.itemconfigure(obj.tag, state = 'hidden');
-            } else {
-                throw e;
-            }
-        }
-    }
-
-    move_direction(obj) {
-        try {
-            const c = this.direction_coords(obj);
-            this.canvas.coords(obj.dir_tag, c[0], c[1], c[2], c[3]);
-            this.canvas.itemconfigure(obj.dir_tag, state = 'normal');
-        } catch (e) {
-            if (e instanceof InvisibleError) {
-                this.canvas.itemconfigure(obj.dir_tag, state = 'hidden');
-            } else {
-                throw e;
-            }
-        }
-    }
-
-    move_paths() {
-        for (const path of this.paths) {
-            try {
-                const c = this.path_coords(path);
-                this.canvas.coords(path.tag, c[0], c[1], c[2], c[3]);
-                this.canvas.itemconfigure(path.tag, state = 'normal');
-            } catch (e) {
-                if (e instanceof InvisibleError) {
-                    this.canvas.itemconfigure(path.tag, state = 'hidden');
-                } else {
-                    throw e;
-                }
-            }
-        }
-    }
-
     create_object(x, y, m = null, v = null, color = null, controlbox = true) {
-        const pos = nj.array(this.camera.actual_point(x, y));
+        const pos = this.camera.actual_point(x, y);
         if (!m) {
             let max_r = Circle.get_r_from_m(this.config.MASS_MAX);
             for (const obj of this.objs) {
-                max_r = min(max_r, (vector_magnitude(obj.pos - pos) - obj.get_r()) / 1.5)
+                max_r = min(max_r, (vector_magnitude(obj.pos.subtract(pos)) - obj.get_r()) / 1.5)
             }
             m = Circle.get_m_from_r(random(Circle.get_r_from_m(this.config.MASS_MIN), max_r));
         }
@@ -175,10 +134,8 @@ class Engine2D {
         }
         const tag = `circle${this.objs.length}`;
         const dir_tag = tag + "_dir";
-        const obj = Circle(this.config, m, pos, v, color, tag, dir_tag, this, controlbox);
-        this.objs.append(obj);
-        this.draw_object(obj);
-        this.draw_direction(obj);
+        const obj = new Circle(this.config, m, pos, v, color, tag, dir_tag, this, controlbox);
+        this.objs.push(obj);
     }
 
     get_rotation_matrix(angles, dir = 1) {
@@ -191,7 +148,7 @@ class Engine2D {
             const o1 = this.objs[i];
             for (let j = i + 1; j < this.objs.length; j++) {
                 const o2 = this.objs[j];
-                const collision = o2.pos - o1.pos;
+                const collision = o2.pos.subtract(o1.pos);
                 const angles = cartesian2auto(collision);
                 const d = angles.shift();
 
@@ -200,7 +157,7 @@ class Engine2D {
                     const R_ = this.get_rotation_matrix(angles, -1);
 
                     const v_temp = [rotate(o1.v, R), rotate(o2.v, R)];
-                    const v_final = nj.copy(v_temp);
+                    const v_final = [v_temp[0].clone(), v_temp[1].clone()];
                     v_final[0][0] = ((o1.m - o2.m) * v_temp[0][0] + 2 * o2.m * v_temp[1][0]) / (o1.m + o2.m);
                     v_final[1][0] = ((o2.m - o1.m) * v_temp[1][0] + 2 * o1.m * v_temp[0][0]) / (o1.m + o2.m);
                     o1.v = rotate(v_final[0], R_);
@@ -209,8 +166,8 @@ class Engine2D {
                     const pos_temp = [[0] * dimension, rotate(collision, R)];
                     pos_temp[0][0] += v_final[0][0];
                     pos_temp[1][0] += v_final[1][0];
-                    o1.pos = o1.pos + rotate(pos_temp[0], R_);
-                    o2.pos = o1.pos + rotate(pos_temp[1], R_);
+                    o1.pos = o1.pos.add(rotate(pos_temp[0], R_));
+                    o2.pos = o1.pos.add(rotate(pos_temp[1], R_));
                 }
             }
         }
@@ -225,13 +182,17 @@ class Engine2D {
 
         for (const obj of this.objs) {
             obj.calculate_position();
+            this.create_path(obj);
         }
     }
 
     redraw_all() {
+        this.ctx.clearRect(0, 0, this.config.W, this.config.H);
         for (const obj of this.objs) {
-            obj.redraw();
+            this.draw_object(obj);
+            this.draw_direction(obj);
         }
+        this.draw_paths();
     }
 
     print_fps() {
