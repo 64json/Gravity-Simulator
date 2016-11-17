@@ -1,32 +1,45 @@
-class Camera3D(Camera2D):
-    def __init__(self, config, engine):
-        super(Camera3D, self).__init__(config, engine)
-        self.theta = 0
+const Camera2D = require('./2d');
+const {deg2rad, rotate, get_rotation_x_matrix, get_rotation_y_matrix} = require('../util');
 
-    def rotate_up(self, key):
-        self.theta -= self.config.CAMERA_ANGLE_STEP
-        self.refresh()
 
-    def rotate_down(self, key):
-        self.theta += self.config.CAMERA_ANGLE_STEP
-        self.refresh()
+class Camera3D extends Camera2D {
+    constructor(config, engine) {
+        super(config, engine);
+        this.theta = 0;
+    }
 
-    def adjust_coord(self, c, allow_invisible=False):
-        Rx = get_rotation_x_matrix(deg2rad(self.theta))
-        Ry = get_rotation_y_matrix(deg2rad(self.phi))
-        c = rotate(rotate(c, Rx), Ry)
-        zoom = self.get_zoom(c[2], allow_invisible)
-        return self.center + (c[:2] - [self.x, self.y]) * zoom
+    rotate_up(key) {
+        this.theta -= this.config.CAMERA_ANGLE_STEP;
+        this.refresh();
+    }
 
-    def adjust_radius(self, c, r):
-        Rx = get_rotation_x_matrix(deg2rad(self.theta))
-        Ry = get_rotation_y_matrix(deg2rad(self.phi))
-        c = rotate(rotate(c, Rx), Ry)
-        zoom = self.get_zoom(c[2])
-        return r * zoom
+    rotate_down(key) {
+        this.theta += this.config.CAMERA_ANGLE_STEP;
+        this.refresh();
+    }
 
-    def actual_point(self, x, y):
-        Rx_ = get_rotation_x_matrix(deg2rad(self.theta), -1)
-        Ry_ = get_rotation_y_matrix(deg2rad(self.phi), -1)
-        c = (([x, y] - self.center) + [self.x, self.y]).tolist() + [0]
-        return rotate(rotate(c, Ry_), Rx_)
+    adjust_coord(c, allow_invisible = False) {
+        const Rx = get_rotation_x_matrix(deg2rad(this.theta));
+        const Ry = get_rotation_y_matrix(deg2rad(this.phi));
+        const c = rotate(rotate(c, Rx), Ry);
+        const zoom = this.get_zoom(c.pop(), allow_invisible);
+        return this.center + (c - [this.x, this.y]) * zoom;
+    }
+
+    adjust_radius(c, r) {
+        const Rx = get_rotation_x_matrix(deg2rad(this.theta));
+        const Ry = get_rotation_y_matrix(deg2rad(this.phi));
+        const c = rotate(rotate(c, Rx), Ry);
+        const zoom = this.get_zoom(c.pop());
+        return r * zoom;
+    }
+
+    actual_point(x, y) {
+        const Rx_ = get_rotation_x_matrix(deg2rad(this.theta), -1);
+        const Ry_ = get_rotation_y_matrix(deg2rad(this.phi), -1);
+        const c = (([x, y] - this.center) + [this.x, this.y]).concat(0);
+        return rotate(rotate(c, Ry_), Rx_);
+    }
+}
+
+module.exports = Camera3D;
