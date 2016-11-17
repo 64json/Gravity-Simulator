@@ -1,5 +1,8 @@
-def EMPTY_2D(c):
-    c.update({
+const {extend} = $;
+
+
+function EMPTY_2D(c) {
+    return extend(true, c, {
         'TITLE': 'Gravity Simulator',
         'W': 1000,
         'H': 750,
@@ -13,19 +16,18 @@ def EMPTY_2D(c):
         'MASS_MIN': 1,
         'MASS_MAX': 4e4,
         'VELOCITY_MAX': 10
-    })
-    return c
+    });
+}
 
 
-def EMPTY_3D(c):
-    EMPTY_2D(c).update({
+function EMPTY_3D(c) {
+    return extend(true, EMPTY_2D(c), {
         'DIMENSION': 3,
         'G': 0.001,
         'MASS_MIN': 1,
         'MASS_MAX': 8e6,
         'VELOCITY_MAX': 10
-    })
-    return c
+    });
+}
 
-
-DEFAULT = EMPTY_3D
+module.exports = EMPTY_2D;
