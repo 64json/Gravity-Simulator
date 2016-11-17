@@ -1,3 +1,4 @@
+const Circle = require('../object/circle');
 const {vector_magnitude, deg2rad, rotate, now, random, polar2cartesian, rand_color} = require('../util');
 
 

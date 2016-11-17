@@ -1,56 +1,6 @@
 const Engine2D = require('./2d');
 
 
-class Sphere(Circle):
-    """Spherical coordinate system
-    https://en.wikipedia.org/wiki/Spherical_coordinate_system
-    """
-
-    def __init__(self, config, m, pos, v, color, tag, dir_tag, engine, controlbox):
-        self.pos_z_controller = None
-        self.v_theta_controller = None
-        super(Sphere, self).__init__(config, m, pos, v, color, tag, dir_tag, engine, controlbox)
-
-    def get_r(self):
-        return Sphere.get_r_from_m(self.m)
-
-    def control_pos(self, e):
-        x = self.pos_x_controller.get()
-        y = self.pos_y_controller.get()
-        z = self.pos_z_controller.get()
-        self.pos = np.array([x, y, z])
-        self.redraw()
-
-    def control_v(self, e):
-        phi = deg2rad(self.v_phi_controller.get())
-        theta = deg2rad(self.v_theta_controller.get())
-        rho = self.v_rho_controller.get()
-        self.v = np.array(spherical2cartesian(rho, phi, theta))
-        self.redraw()
-
-    def setup_controllers(self, pos_range, m, v, v_range):
-        super(Sphere, self).setup_controllers(pos_range, m, v, v_range)
-        self.pos_z_controller = Controller("Position z", -pos_range, pos_range, self.pos[2], self.control_pos)
-        self.v_theta_controller = Controller("Velocity θ", -180, 180, rad2deg(v[2]), self.control_v)
-
-    def get_controllers(self):
-        return [self.m_controller,
-                self.pos_x_controller,
-                self.pos_y_controller,
-                self.pos_z_controller,
-                self.v_rho_controller,
-                self.v_phi_controller,
-                self.v_theta_controller]
-
-    @staticmethod
-    def get_r_from_m(m):
-        return m ** (1 / 3)
-
-    @staticmethod
-    def get_m_from_r(r):
-        return r ** 3
-
-
 class Camera3D(Camera2D):
     def __init__(self, config, engine):
         super(Camera3D, self).__init__(config, engine)
