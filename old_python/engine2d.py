@@ -154,8 +154,7 @@ class Camera2D(object):
             self.combo = 0
         self.last_time = current_time
         self.last_key = key
-        zoom = self.get_zoom()
-        return self.config.CAMERA_COORD_STEP * self.config.CAMERA_ACCELERATION ** self.combo / zoom
+        return self.config.CAMERA_COORD_STEP * self.config.CAMERA_ACCELERATION ** self.combo
 
     def up(self, key):
         self.y -= self.get_coord_step(key)
@@ -198,7 +197,7 @@ class Camera2D(object):
             if distance == 0:
                 distance = 1e-10
             elif distance < 0:
-                distance *= -1
+                distance *= -1  # TODO: FIX
         elif distance <= 0:
             raise InvisibleError
         return 100 / distance
@@ -208,9 +207,9 @@ class Camera2D(object):
         zoom = self.get_zoom()
         return self.center + (rotate(c, R) - [self.x, self.y]) * zoom
 
-    def adjust_magnitude(self, c, s):
+    def adjust_radius(self, c, r):
         zoom = self.get_zoom()
-        return s * zoom
+        return r * zoom
 
     def actual_point(self, x, y):
         R_ = get_rotation_matrix(deg2rad(self.phi), -1)
@@ -260,7 +259,7 @@ class Engine2D(object):
         self.canvas.after(10, self.animate)
 
     def object_coords(self, obj):
-        r = self.camera.adjust_magnitude(obj.pos, obj.get_r())
+        r = self.camera.adjust_radius(obj.pos, obj.get_r())
         [x, y] = self.camera.adjust_coord(obj.pos)
         return x - r, y - r, x + r, y + r
 

@@ -75,12 +75,12 @@ class Camera3D(Camera2D):
         zoom = self.get_zoom(c[2], allow_invisible)
         return self.center + (c[:2] - [self.x, self.y]) * zoom
 
-    def adjust_magnitude(self, c, s):
+    def adjust_radius(self, c, r):
         Rx = get_rotation_x_matrix(deg2rad(self.theta))
         Ry = get_rotation_y_matrix(deg2rad(self.phi))
         c = rotate(rotate(c, Rx), Ry)
         zoom = self.get_zoom(c[2])
-        return s * zoom
+        return r * zoom
 
     def actual_point(self, x, y):
         Rx_ = get_rotation_x_matrix(deg2rad(self.theta), -1)
