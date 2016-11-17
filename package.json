@@ -1,19 +1,19 @@
 {
-  "name": "Quantify",
+  "name": "Gravity Simulator",
   "version": "0.0.1",
-  "description": "Unit Simplifier",
+  "description": "Universal Gravity and Elastic Collision Simulator",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/parkjs814/DuoCoder.git"
+    "url": "git+https://github.com/parkjs814/Gravity-Simulator.git"
   },
-  "author": "Jason Park and Rounak Bastola",
+  "author": "Jason Park",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/parkjs814/Quantify/issues"
+    "url": "https://github.com/parkjs814/Gravity-Simulator/issues"
   },
-  "homepage": "https://github.com/parkjs814/Quantify",
+  "homepage": "https://github.com/parkjs814/Gravity-Simulator",
   "scripts": {
-    "start": "gulp prod",
+    "start": "gulp",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {

@@ -21,11 +21,6 @@ class Circle {
         this.dir_tag = dir_tag;
         this.engine = engine;
 
-        this.m_controller = null;
-        this.pos_x_controller = null;
-        this.pos_y_controller = null;
-        this.v_phi_controller = null;
-        this.v_rho_controller = null;
         this.controlbox = null;
         if (controlbox) {
             this.show_controlbox()

@@ -81,15 +81,15 @@ class Camera2D {
         return 100 / distance;
     }
 
-    adjust_coord(c, allow_invisible = false) {
+    adjust_coord(coord, allow_invisible = false) {
         const R = get_rotation_matrix(deg2rad(this.phi));
         const zoom = this.get_zoom();
-        return this.center + (rotate(c, R) - [this.x, this.y]) * zoom;
+        return this.center + (rotate(coord, R) - [this.x, this.y]) * zoom;
     }
 
-    adjust_radius(c, r) {
+    adjust_radius(coord, radius) {
         const zoom = this.get_zoom();
-        return r * zoom;
+        return radius * zoom;
     }
 
     actual_point(x, y) {

@@ -3,6 +3,10 @@ const Util = {
         return x * x;
     },
 
+    cube: (x) => {
+        return x * x * x;
+    },
+
     polar2cartesian: (rho, phi) => {
         return [
             rho * Math.cos(phi),

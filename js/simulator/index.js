@@ -1,4 +1,3 @@
-const preset = require('./preset');
 const Engine2D = require('./engine/2d');
 const Engine3D = require('./engine/3d');
 const {} = require('./util');

@@ -1,6 +1,8 @@
 const Circle = require('./circle');
 const Controller = require('../control/controller');
 const {rad2deg, deg2rad, spherical2cartesian} = require('../util');
+const {cube} = require('../util');
+const {pow} = Math;
 
 
 class Sphere extends Circle {
@@ -8,12 +10,6 @@ class Sphere extends Circle {
      * Spherical coordinate system
      * https://en.wikipedia.org/wiki/Spherical_coordinate_system
      */
-
-    constructor(config, m, pos, v, color, tag, dir_tag, engine, controlbox) {
-        this.pos_z_controller = null;
-        this.v_theta_controller = null;
-        super(config, m, pos, v, color, tag, dir_tag, engine, controlbox);
-    }
 
     get_r() {
         return Sphere.get_r_from_m(this.m);
@@ -54,11 +50,11 @@ class Sphere extends Circle {
     }
 
     static get_r_from_m(m) {
-        return m ** (1 / 3);
+        return pow(m, 1 / 3);
     }
 
     static get_m_from_r(r) {
-        return r ** 3;
+        return cube(r);
     }
 }
 
