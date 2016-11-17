@@ -81,3 +81,35 @@ function get_rotation_matrix(x, dir = 1) {
         [sin, cos]
     ]);
 }
+
+function get_rotation_x_matrix(x, dir=1) {
+    const sin = Math.sin(x * dir);
+    const cos = Math.cos(x * dir);
+    return np.matrix([
+        [1, 0, 0],
+        [0, cos, -sin],
+        [0, sin, cos]
+    ]);
+}
+
+
+function get_rotation_y_matrix(x, dir=1) {
+    const sin = Math.sin(x * dir);
+    const cos = Math.cos(x * dir);
+    return np.matrix([
+        [cos, 0, -sin],
+        [0, 1, 0],
+        [sin, 0, cos]
+    ]);
+}
+
+
+function get_rotation_z_matrix(x, dir=1) {
+    const sin = Math.sin(x * dir);
+    const cos = Math.cos(x * dir);
+    return np.matrix([
+        [cos, -sin, 0],
+        [sin, cos, 0],
+        [0, 0, 1]
+    ]);
+}
