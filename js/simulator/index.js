@@ -23,10 +23,9 @@ class Simulator {
         preset(config);
         const $canvas = $('canvas');
         const ctx = $canvas.getContext('2d');
-        this.engine = (config.DIMENSION == 2 ? Engine2D : Engine3D)(config, ctx, this.on_key_press);
+        this.engine = (config.DIMENSION == 2 ? Engine2D : Engine3D)(config, ctx);
         $canvas.keypress(this.on_key_press());
         $canvas.click(this.on_click());
-        $('body').append($canvas);
     }
 
     animate() {
@@ -50,7 +49,6 @@ class Simulator {
             engine.create_object(event.x, event.y);
         }
     }
-
 
     on_key_press(event) {
         const {char} = event;

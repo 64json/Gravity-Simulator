@@ -12,7 +12,7 @@ import source from "vinyl-source-stream";
 import buffer from "vinyl-buffer";
 import pkg from "./package.json";
 
-const appName = 'gravity simulator';
+const appName = 'gravity_simulator';
 
 const outputPaths = {
   js: './public',

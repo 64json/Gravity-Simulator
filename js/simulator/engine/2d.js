@@ -14,7 +14,7 @@ class Path {
 }
 
 class Engine2D {
-    constructor(config, canvas, on_key_press) {
+    constructor(config, canvas) {
         this.config = config;
         this.canvas = canvas;
         this.objs = [];
@@ -22,7 +22,6 @@ class Engine2D {
         this.controlboxes = [];
         this.paths = [];
         this.camera = Camera2D(config, this);
-        this.on_key_press = on_key_press;
         this.camera_changed = false;
         this.fps_last_time = now();
         this.fps_count = 0;

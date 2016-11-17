@@ -1,5 +1,5 @@
 const Circle = require('./circle');
-const {Controller} = require('../control');
+const Controller = require('../control/controller');
 const {rad2deg, deg2rad, spherical2cartesian} = require('../util');
 
 

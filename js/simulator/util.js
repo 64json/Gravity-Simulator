@@ -1,4 +1,8 @@
-module.exports = {
+const Util = {
+    square: (x) => {
+        return x * x;
+    },
+
     polar2cartesian: (rho, phi) => {
         return [
             rho * Math.cos(phi),
@@ -8,7 +12,7 @@ module.exports = {
 
     cartesian2polar: (x, y) => {
         return [
-            Math.sqrt(x ** 2 + y ** 2),
+            Math.sqrt(Util.square(x) + Util.square(y)),
             Math.atan2(x, y)
         ];
     },
@@ -22,7 +26,7 @@ module.exports = {
     },
 
     cartesian2spherical: (x, y, z) => {
-        rho = Math.sqrt(x ** 2 + y ** 2 + z ** 2)
+        const rho = Math.sqrt(Util.square(x) + Util.square(y) + Util.square(z));
         return [
             rho,
             Math.atan2(x, y),
@@ -45,7 +49,7 @@ module.exports = {
     },
 
     get_distance: (x0, y0, x1, y1) => {
-        return Math.sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2);
+        return Math.sqrt(Util.square(x1 - x0) + Util.square(y1 - y0));
     },
 
     vector_magnitude: (vector) => {
@@ -115,3 +119,5 @@ module.exports = {
         ]);
     }
 };
+
+module.exports = Util;

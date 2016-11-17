@@ -1,6 +1,7 @@
-const {ControlBox, Controller} = require('../control');
-const {vector_magnitude, rad2deg, deg2rad, polar2cartesian, cartesian2auto} = require('../util');
-const {max} = Math;
+const ControlBox = require('../control/control_box');
+const Controller = require('../control/controller');
+const {vector_magnitude, rad2deg, deg2rad, polar2cartesian, cartesian2auto, square} = require('../util');
+const {max, pow} = Math;
 
 
 class Circle {
@@ -42,7 +43,7 @@ class Circle {
             const vector = this.pos - obj.pos;
             const magnitude = vector_magnitude(vector);
             const unit_vector = vector / magnitude;
-            F += obj.m / magnitude ** 2 * unit_vector
+            F += obj.m / square(magnitude) * unit_vector
         }
         F *= -this.config.G * this.m;
         const a = F / this.m;
@@ -93,7 +94,7 @@ class Circle {
             }
 
             this.setup_controllers(pos_range, m, v, v_range);
-            this.controlbox = ControlBox(this.tag, this.get_controllers(), this.engine.on_key_press);
+            this.controlbox = ControlBox(this.tag, this.get_controllers());
             this.engine.controlboxes.append(this.controlbox.tk)
         }
     }
@@ -123,11 +124,11 @@ class Circle {
     }
 
     static get_r_from_m(m) {
-        return m ** (1 / 2)
+        return pow(m, 1 / 2)
     }
 
     static get_m_from_r(r) {
-        return r ** 2
+        return square(r)
     }
 
     toString() {

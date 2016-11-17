@@ -1,5 +1,6 @@
 const InvisibleError = require('../error/invisible');
 const {deg2rad, rotate, now, get_rotation_matrix} = require('../util');
+const {pow} = Math;
 
 class Camera2D {
     constructor(config, engine) {
@@ -24,7 +25,7 @@ class Camera2D {
         }
         this.last_time = current_time;
         this.last_key = key;
-        return this.config.CAMERA_COORD_STEP * this.config.CAMERA_ACCELERATION ** this.combo;
+        return this.config.CAMERA_COORD_STEP * pow(this.config.CAMERA_ACCELERATION, this.combo);
     }
 
     up(key) {

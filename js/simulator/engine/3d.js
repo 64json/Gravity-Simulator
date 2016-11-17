@@ -6,8 +6,8 @@ const {min} = Math;
 
 
 class Engine3D extends Engine2D {
-    constructor(config, canvas, on_key_press) {
-        super(config, canvas, on_key_press);
+    constructor(config, canvas) {
+        super(config, canvas);
         this.camera = Camera3D(config, this);
     }
 
