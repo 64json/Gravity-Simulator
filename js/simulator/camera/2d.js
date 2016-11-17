@@ -12,7 +12,7 @@ class Camera2D {
         this.last_time = 0;
         this.last_key = null;
         this.combo = 0;
-        this.center = np.array([config.W / 2, config.H / 2]);
+        this.center = nj.array([config.W / 2, config.H / 2]);
     }
 
     get_coord_step(key) {

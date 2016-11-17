@@ -2,7 +2,7 @@ from __future__ import division
 
 import math
 
-import numpy as np
+import numpy as nj
 
 
 def polar2cartesian(rho, phi):
@@ -47,11 +47,11 @@ def get_distance(x0, y0, x1, y1):
 
 
 def vector_magnitude(vector):
-    return np.linalg.norm(vector)
+    return nj.linalg.norm(vector)
 
 
 def c2d():
-    return np.array([0, 0])
+    return nj.array([0, 0])
 
 
 def rotate(vector, matrix):
@@ -76,7 +76,7 @@ function rand_color() {
 function get_rotation_matrix(x, dir = 1) {
     const sin = Math.sin(x * dir);
     const cos = Math.cos(x * dir);
-    return np.matrix([
+    return nj.matrix([
         [cos, -sin],
         [sin, cos]
     ]);
@@ -85,7 +85,7 @@ function get_rotation_matrix(x, dir = 1) {
 function get_rotation_x_matrix(x, dir=1) {
     const sin = Math.sin(x * dir);
     const cos = Math.cos(x * dir);
-    return np.matrix([
+    return nj.matrix([
         [1, 0, 0],
         [0, cos, -sin],
         [0, sin, cos]
@@ -96,7 +96,7 @@ function get_rotation_x_matrix(x, dir=1) {
 function get_rotation_y_matrix(x, dir=1) {
     const sin = Math.sin(x * dir);
     const cos = Math.cos(x * dir);
-    return np.matrix([
+    return nj.matrix([
         [cos, 0, -sin],
         [0, 1, 0],
         [sin, 0, cos]
@@ -107,7 +107,7 @@ function get_rotation_y_matrix(x, dir=1) {
 function get_rotation_z_matrix(x, dir=1) {
     const sin = Math.sin(x * dir);
     const cos = Math.cos(x * dir);
-    return np.matrix([
+    return nj.matrix([
         [cos, -sin, 0],
         [sin, cos, 0],
         [0, 0, 1]

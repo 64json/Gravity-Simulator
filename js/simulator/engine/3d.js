@@ -13,7 +13,7 @@ class Engine3D extends Engine2D {
 
 
     create_object(x, y, m = None, v = None, color = None, controlbox = True) {
-        const pos = np.array(this.camera.actual_point(x, y));
+        const pos = nj.array(this.camera.actual_point(x, y));
         if (!m) {
             let max_r = Sphere.get_r_from_m(this.config.MASS_MAX);
             for (const obj of this.objs) {
@@ -22,7 +22,7 @@ class Engine3D extends Engine2D {
             m = Sphere.get_m_from_r(random(Sphere.get_r_from_m(this.config.MASS_MIN), max_r));
         }
         if (!v) {
-            v = np.array(spherical2cartesian(
+            v = nj.array(spherical2cartesian(
                 random(this.config.VELOCITY_MAX / 2),
                 random(-180, 180),
                 random(-180, 180)));

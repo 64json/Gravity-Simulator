@@ -8,8 +8,8 @@ const {min} = Math;
 class Path {
     constructor(tag, obj) {
         this.tag = tag;
-        this.prev_pos = np.copy(obj.prev_pos);
-        this.pos = np.copy(obj.pos);
+        this.prev_pos = nj.copy(obj.prev_pos);
+        this.pos = nj.copy(obj.pos);
     }
 }
 
@@ -107,7 +107,7 @@ class Engine2D {
                 }
             }
             this.paths.append(Path(this.canvas.create_line(c[0], c[1], c[2], c[3], fill = "grey"), obj));
-            obj.prev_pos = np.copy(obj.pos);
+            obj.prev_pos = nj.copy(obj.pos);
             if (this.paths.length > this.config.MAX_PATHS) {
                 this.canvas.delete(this.paths[0].tag);
                 this.paths = this.paths.slice(1);
@@ -160,7 +160,7 @@ class Engine2D {
     }
 
     create_object(x, y, m = null, v = null, color = null, controlbox = true) {
-        const pos = np.array(this.camera.actual_point(x, y));
+        const pos = nj.array(this.camera.actual_point(x, y));
         if (!m) {
             let max_r = Circle.get_r_from_m(this.config.MASS_MAX);
             for (const obj of this.objs) {
@@ -169,7 +169,7 @@ class Engine2D {
             m = Circle.get_m_from_r(random(Circle.get_r_from_m(this.config.MASS_MIN), max_r));
         }
         if (!v) {
-            v = np.array(polar2cartesian(random(this.config.VELOCITY_MAX / 2), random(-180, 180)))
+            v = nj.array(polar2cartesian(random(this.config.VELOCITY_MAX / 2), random(-180, 180)))
         }
         if (!color) {
             color = rand_color();
@@ -201,7 +201,7 @@ class Engine2D {
                     const R_ = this.get_rotation_matrix(angles, -1);
 
                     const v_temp = [rotate(o1.v, R), rotate(o2.v, R)];
-                    const v_final = np.copy(v_temp);
+                    const v_final = nj.copy(v_temp);
                     v_final[0][0] = ((o1.m - o2.m) * v_temp[0][0] + 2 * o2.m * v_temp[1][0]) / (o1.m + o2.m);
                     v_final[1][0] = ((o2.m - o1.m) * v_temp[1][0] + 2 * o1.m * v_temp[0][0]) / (o1.m + o2.m);
                     o1.v = rotate(v_final[0], R_);

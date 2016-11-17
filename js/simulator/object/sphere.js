@@ -23,7 +23,7 @@ class Sphere extends Circle {
         const x = this.pos_x_controller.get();
         const y = this.pos_y_controller.get();
         const z = this.pos_z_controller.get();
-        this.pos = np.array([x, y, z]);
+        this.pos = nj.array([x, y, z]);
         this.redraw();
     }
 
@@ -31,7 +31,7 @@ class Sphere extends Circle {
         const phi = deg2rad(this.v_phi_controller.get());
         const theta = deg2rad(this.v_theta_controller.get());
         const rho = this.v_rho_controller.get();
-        this.v = np.array(spherical2cartesian(rho, phi, theta));
+        this.v = nj.array(spherical2cartesian(rho, phi, theta));
         this.redraw();
     }
 

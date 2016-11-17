@@ -13,7 +13,7 @@ class Circle {
         this.config = config;
         this.m = m;
         this.pos = pos;
-        this.prev_pos = np.copy(pos);
+        this.prev_pos = nj.copy(pos);
         this.v = v;
         this.color = color;
         this.tag = tag;
@@ -62,14 +62,14 @@ class Circle {
     control_pos(e) {
         const x = this.pos_x_controller.get();
         const y = this.pos_y_controller.get();
-        this.pos = np.array([x, y]);
+        this.pos = nj.array([x, y]);
         this.redraw();
     }
 
     control_v(e) {
         const phi = deg2rad(this.v_phi_controller.get());
         const rho = this.v_rho_controller.get();
-        this.v = np.array(polar2cartesian(rho, phi));
+        this.v = nj.array(polar2cartesian(rho, phi));
         this.redraw();
     }
 
