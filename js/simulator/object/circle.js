@@ -1,6 +1,7 @@
 const ControlBox = require('../control/control_box');
 const Controller = require('../control/controller');
 const {vector_magnitude, rad2deg, deg2rad, polar2cartesian, cartesian2auto, square} = require('../util');
+const {zeros, mag, add, sub, mul, div, dot} = require('../matrix');
 const {max, pow} = Math;
 
 
@@ -10,7 +11,7 @@ class Circle {
      * https://en.wikipedia.org/wiki/Polar_coordinate_system
      */
 
-    constructor(config, m, pos, v, color, tag, dir_tag, engine, controlbox) {
+    constructor(config, m, pos, v, color, tag, engine, controlbox) {
         this.config = config;
         this.m = m;
         this.pos = pos;
@@ -18,7 +19,6 @@ class Circle {
         this.v = v;
         this.color = color;
         this.tag = tag;
-        this.dir_tag = dir_tag;
         this.engine = engine;
 
         this.controlbox = null;
@@ -32,21 +32,21 @@ class Circle {
     }
 
     calculate_velocity() {
-        let F = nj.zeros(this.config.DIMENSION);
+        let F = zeros(this.config.DIMENSION);
         for (const obj of this.engine.objs) {
             if (obj == this) continue;
-            const vector = this.pos.subtract(obj.pos);
-            const magnitude = vector_magnitude(vector);
-            const unit_vector = vector.divide(magnitude);
-            F = F.add(unit_vector.multiply(obj.m / square(magnitude)))
+            const vector = sub(this.pos, obj.pos);
+            const magnitude = mag(vector);
+            const unit_vector = div(vector, magnitude);
+            F = add(F, mul(obj.m / square(magnitude), unit_vector))
         }
-        F = F.multiply(-this.config.G * this.m);
-        const a = F.divide(this.m);
-        this.v = this.v.add(a);
+        F = mul(F, -this.config.G * this.m);
+        const a = div(F, this.m);
+        this.v = add(this.v, a);
     }
 
     calculate_position() {
-        this.pos = this.pos.add(this.v);
+        this.pos = add(this.pos, this.v);
     }
 
     control_m(e) {
@@ -57,13 +57,13 @@ class Circle {
     control_pos(e) {
         const x = this.pos_x_controller.get();
         const y = this.pos_y_controller.get();
-        this.pos = nj.array([x, y]);
+        this.pos = [x, y];
     }
 
     control_v(e) {
         const phi = deg2rad(this.v_phi_controller.get());
         const rho = this.v_rho_controller.get();
-        this.v = nj.array(polar2cartesian(rho, phi));
+        this.v = polar2cartesian(rho, phi);
     }
 
     show_controlbox() {
@@ -72,17 +72,17 @@ class Circle {
         } catch (e) {
             const margin = 1.5;
 
-            var pos_range = max(max(this.config.W, this.config.H) / 2, max.apply(null, this.pos.tolist().map(Math.abs)) * margin);
+            var pos_range = max(max(this.config.W, this.config.H) / 2, max.apply(null, this.pos.map(Math.abs)) * margin);
             for (const obj of this.engine.objs) {
-                pos_range = max(pos_range, max.apply(null, obj.pos.tolist().map(Math.abs)) * margin);
+                pos_range = max(pos_range, max.apply(null, obj.pos.map(Math.abs)) * margin);
             }
 
             const m = this.m;
 
             const v = cartesian2auto(this.v);
-            var v_range = max(this.config.VELOCITY_MAX, vector_magnitude(this.v) * margin);
+            var v_range = max(this.config.VELOCITY_MAX, mag(this.v) * margin);
             for (const obj of this.engine.objs) {
-                v_range = max(v_range, vector_magnitude(obj.v) * margin);
+                v_range = max(v_range, mag(obj.v) * margin);
             }
 
             this.setup_controllers(pos_range, m, v, v_range);

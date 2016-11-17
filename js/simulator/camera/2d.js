@@ -1,5 +1,6 @@
 const InvisibleError = require('../error/invisible');
 const {deg2rad, rotate, now, get_rotation_matrix} = require('../util');
+const {zeros, mag, add, sub, mul, div, dot} = require('../matrix');
 const {pow} = Math;
 
 class Camera2D {
@@ -13,7 +14,7 @@ class Camera2D {
         this.last_time = 0;
         this.last_key = null;
         this.combo = 0;
-        this.center = nj.array([config.W / 2, config.H / 2]);
+        this.center = [config.W / 2, config.H / 2];
     }
 
     get_coord_step(key) {
@@ -83,7 +84,7 @@ class Camera2D {
     adjust_coord(coord, allow_invisible = false) {
         const R = get_rotation_matrix(deg2rad(this.phi));
         const zoom = this.get_zoom();
-        return this.center + (rotate(coord, R) - [this.x, this.y]) * zoom;
+        return add(this.center, mul(sub(rotate(coord, R), [this.x, this.y]), zoom));
     }
 
     adjust_radius(coord, radius) {
@@ -94,7 +95,7 @@ class Camera2D {
     actual_point(x, y) {
         const R_ = get_rotation_matrix(deg2rad(this.phi), -1);
         const zoom = this.get_zoom();
-        return rotate((nj.array([x, y]).subtract(this.center)).divide(zoom).add([this.x, this.y]), R_);
+        return rotate(add(div(sub([x, y], this.center), zoom), [this.x, this.y]), R_);
     }
 }
 

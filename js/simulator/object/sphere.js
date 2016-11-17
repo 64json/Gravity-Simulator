@@ -19,14 +19,14 @@ class Sphere extends Circle {
         const x = this.pos_x_controller.get();
         const y = this.pos_y_controller.get();
         const z = this.pos_z_controller.get();
-        this.pos = nj.array([x, y, z]);
+        this.pos = [x, y, z];
     }
 
     control_v(e) {
         const phi = deg2rad(this.v_phi_controller.get());
         const theta = deg2rad(this.v_theta_controller.get());
         const rho = this.v_rho_controller.get();
-        this.v = nj.array(spherical2cartesian(rho, phi, theta));
+        this.v = spherical2cartesian(rho, phi, theta);
     }
 
     setup_controllers(pos_range, m, v, v_range) {

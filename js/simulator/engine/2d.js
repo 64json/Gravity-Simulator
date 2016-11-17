@@ -2,6 +2,7 @@ const Circle = require('../object/circle');
 const Camera2D = require('../camera/2d');
 const InvisibleError = require('../error/invisible');
 const {vector_magnitude, rotate, now, random, polar2cartesian, rand_color, get_rotation_matrix, cartesian2auto} = require('../util');
+const {zeros, mag, add, sub, mul, div, dot} = require('../matrix');
 const {min} = Math;
 
 
@@ -51,7 +52,7 @@ class Engine2D {
 
     direction_coords(obj) {
         const [cx, cy] = this.camera.adjust_coord(obj.pos);
-        const [dx, dy] = this.camera.adjust_coord(obj.pos + obj.v * 50, true);
+        const [dx, dy] = this.camera.adjust_coord(add(obj.pos, mul(obj.v, 50)), true);
         return [cx, cy, dx, dy];
     }
 
@@ -122,19 +123,18 @@ class Engine2D {
         if (!m) {
             let max_r = Circle.get_r_from_m(this.config.MASS_MAX);
             for (const obj of this.objs) {
-                max_r = min(max_r, (vector_magnitude(obj.pos.subtract(pos)) - obj.get_r()) / 1.5)
+                max_r = min(max_r, (mag(sub(obj.pos, pos)) - obj.get_r()) / 1.5)
             }
             m = Circle.get_m_from_r(random(Circle.get_r_from_m(this.config.MASS_MIN), max_r));
         }
         if (!v) {
-            v = nj.array(polar2cartesian(random(this.config.VELOCITY_MAX / 2), random(-180, 180)))
+            v = polar2cartesian(random(this.config.VELOCITY_MAX / 2), random(-180, 180))
         }
         if (!color) {
             color = rand_color();
         }
         const tag = `circle${this.objs.length}`;
-        const dir_tag = tag + "_dir";
-        const obj = new Circle(this.config, m, pos, v, color, tag, dir_tag, this, controlbox);
+        const obj = new Circle(this.config, m, pos, v, color, tag, this, controlbox);
         this.objs.push(obj);
     }
 
@@ -148,7 +148,7 @@ class Engine2D {
             const o1 = this.objs[i];
             for (let j = i + 1; j < this.objs.length; j++) {
                 const o2 = this.objs[j];
-                const collision = o2.pos.subtract(o1.pos);
+                const collision = sub(o2.pos, o1.pos);
                 const angles = cartesian2auto(collision);
                 const d = angles.shift();
 
@@ -157,13 +157,13 @@ class Engine2D {
                     const R_ = this.get_rotation_matrix(angles, -1);
 
                     const v_temp = [rotate(o1.v, R), rotate(o2.v, R)];
-                    const v_final = [v_temp[0].clone(), v_temp[1].clone()];
+                    const v_final = [v_temp[0].slice(), v_temp[1].slice()];
                     v_final[0][0] = ((o1.m - o2.m) * v_temp[0][0] + 2 * o2.m * v_temp[1][0]) / (o1.m + o2.m);
                     v_final[1][0] = ((o2.m - o1.m) * v_temp[1][0] + 2 * o1.m * v_temp[0][0]) / (o1.m + o2.m);
                     o1.v = rotate(v_final[0], R_);
                     o2.v = rotate(v_final[1], R_);
 
-                    const pos_temp = [[0] * dimension, rotate(collision, R)];
+                    const pos_temp = [zeros(dimension), rotate(collision, R)];
                     pos_temp[0][0] += v_final[0][0];
                     pos_temp[1][0] += v_final[1][0];
                     o1.pos = o1.pos.add(rotate(pos_temp[0], R_));

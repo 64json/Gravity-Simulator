@@ -8,6 +8,19 @@ function iter(a, func) {
 }
 
 module.exports = {
+    zeros: N => {
+        Array.apply(null, Array(N)).map(Number.prototype.valueOf,0);
+    },
+
+    mag: a => {
+        const a_r = a.length;
+        let sum = 0;
+        for (let i = 0; i < a_r; i++) {
+            sum += a[i] * a[i];
+        }
+        return Math.sqrt(sum);
+    },
+
     add: (a, b) => {
         return iter(a, i => {
             return a[i] + b[i];
