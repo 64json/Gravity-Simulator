@@ -1,20 +1,22 @@
 class Controller {
-    constructor(name, min, max, value, func) {
-        const $inputWrapper = $('.input-wrapper.template').clone();
+    constructor(object, name, min, max, value, func) {
+        const $inputWrapper = $('.control-box.template .input-wrapper.template').clone();
         $inputWrapper.removeClass('template');
         $inputWrapper.find('span').text(name);
         const $input = $inputWrapper.find('input');
         $input.attr('min', min);
         $input.attr('max', max);
         $input.attr('value', value);
-        $input.change(func);
+        $input.on('input', e => {
+            func.call(object, e);
+        });
 
         this.$inputWrapper = $inputWrapper;
         this.$input = $input;
     }
 
     get() {
-        return this.$input.val();
+        return Math.floor(this.$input.val());
     }
 }
 

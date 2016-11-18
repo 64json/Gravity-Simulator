@@ -31,8 +31,8 @@ class Sphere extends Circle {
 
     setup_controllers(pos_range, m, v, v_range) {
         super.setup_controllers(pos_range, m, v, v_range);
-        this.pos_z_controller = new Controller("Position z", -pos_range, pos_range, this.pos[2], this.control_pos);
-        this.v_theta_controller = new Controller("Velocity θ", -180, 180, rad2deg(v[2]), this.control_v);
+        this.pos_z_controller = new Controller(this, "Position z", -pos_range, pos_range, this.pos[2], this.control_pos);
+        this.v_theta_controller = new Controller(this, "Velocity θ", -180, 180, rad2deg(v[2]), this.control_v);
     }
 
     get_controllers() {

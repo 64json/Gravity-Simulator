@@ -92,11 +92,11 @@ class Circle {
     }
 
     setup_controllers(pos_range, m, v, v_range) {
-        this.m_controller = new Controller("Mass m", this.config.MASS_MIN, this.config.MASS_MAX, m, this.control_m);
-        this.pos_x_controller = new Controller("Position x", -pos_range, pos_range, this.pos[0], this.control_pos);
-        this.pos_y_controller = new Controller("Position y", -pos_range, pos_range, this.pos[1], this.control_pos);
-        this.v_rho_controller = new Controller("Velocity ρ", 0, v_range, v[0], this.control_v);
-        this.v_phi_controller = new Controller("Velocity φ", -180, 180, rad2deg(v[1]), this.control_v);
+        this.m_controller = new Controller(this, "Mass m", this.config.MASS_MIN, this.config.MASS_MAX, m, this.control_m);
+        this.pos_x_controller = new Controller(this, "Position x", -pos_range, pos_range, this.pos[0], this.control_pos);
+        this.pos_y_controller = new Controller(this, "Position y", -pos_range, pos_range, this.pos[1], this.control_pos);
+        this.v_rho_controller = new Controller(this, "Velocity ρ", 0, v_range, v[0], this.control_v);
+        this.v_phi_controller = new Controller(this, "Velocity φ", -180, 180, rad2deg(v[1]), this.control_v);
     }
 
     get_controllers() {

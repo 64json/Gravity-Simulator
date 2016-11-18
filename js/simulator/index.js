@@ -28,10 +28,7 @@ function on_click(event, engine) {
     const y = event.pageY;
     if (!engine.animating) {
         for (const obj of engine.objs) {
-            const c = engine.object_coords(obj);
-            const cx = (c[0] + c[2]) / 2;
-            const cy = (c[1] + c[3]) / 2;
-            const r = (c[2] - c[0]) / 2;
+            const [cx, cy, r] = engine.object_coords(obj);
             if (get_distance(cx, cy, x, y) < r) {
                 obj.show_controlbox();
                 return;
