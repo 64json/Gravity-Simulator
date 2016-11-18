@@ -46,28 +46,30 @@ class Engine2D {
 
     object_coords(obj) {
         const r = this.camera.adjust_radius(obj.pos, obj.get_r());
-        const [x, y] = this.camera.adjust_coord(obj.pos);
+        const [x, y] = this.camera.adjust_coords(obj.pos);
         return [x, y, r];
     }
 
     direction_coords(obj) {
-        const [cx, cy] = this.camera.adjust_coord(obj.pos);
-        const [dx, dy] = this.camera.adjust_coord(add(obj.pos, mul(obj.v, 50)), true);
+        const [cx, cy] = this.camera.adjust_coords(obj.pos);
+        const [dx, dy] = this.camera.adjust_coords(add(obj.pos, mul(obj.v, 50)), true);
         return [cx, cy, dx, dy];
     }
 
     path_coords(obj) {
-        const [fx, fy] = this.camera.adjust_coord(obj.prev_pos);
-        const [tx, ty] = this.camera.adjust_coord(obj.pos);
+        const [fx, fy] = this.camera.adjust_coords(obj.prev_pos);
+        const [tx, ty] = this.camera.adjust_coords(obj.pos);
         return [fx, fy, tx, ty];
     }
 
-    draw_object(obj) {
+    draw_object(c, color = null) {
         try {
-            const c = this.object_coords(obj);
+            if (c instanceof Circle) {
+                c = this.object_coords(c);
+            }
             this.ctx.beginPath();
             this.ctx.arc(c[0], c[1], c[2], 0, 2 * Math.PI, false);
-            this.ctx.fillStyle = obj.color;
+            this.ctx.fillStyle = color || c.color;
             this.ctx.fill();
         } catch (e) {
             if (!(e instanceof InvisibleError)) {
@@ -76,9 +78,11 @@ class Engine2D {
         }
     }
 
-    draw_direction(obj) {
+    draw_direction(c) {
         try {
-            const c = this.direction_coords(obj);
+            if (c instanceof Circle) {
+                c = this.direction_coords(c);
+            }
             this.ctx.beginPath();
             this.ctx.moveTo(c[0], c[1]);
             this.ctx.lineTo(c[2], c[3]);
@@ -91,19 +95,19 @@ class Engine2D {
         }
     }
 
-    draw_paths() {
-        for (const path of this.paths) {
-            try {
-                const c = this.path_coords(path);
-                this.ctx.beginPath();
-                this.ctx.moveTo(c[0], c[1]);
-                this.ctx.lineTo(c[2], c[3]);
-                this.ctx.strokeStyle = '#dddddd';
-                this.ctx.stroke();
-            } catch (e) {
-                if (!(e instanceof InvisibleError)) {
-                    throw e;
-                }
+    draw_path(c) {
+        try {
+            if (c instanceof Path) {
+                c = this.path_coords(c);
+            }
+            this.ctx.beginPath();
+            this.ctx.moveTo(c[0], c[1]);
+            this.ctx.lineTo(c[2], c[3]);
+            this.ctx.strokeStyle = '#dddddd';
+            this.ctx.stroke();
+        } catch (e) {
+            if (!(e instanceof InvisibleError)) {
+                throw e;
             }
         }
     }
@@ -193,7 +197,9 @@ class Engine2D {
             this.draw_object(obj);
             this.draw_direction(obj);
         }
-        this.draw_paths();
+        for (const path of this.paths) {
+            this.draw_path(path);
+        }
     }
 
     print_fps() {

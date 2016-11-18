@@ -1,9 +1,10 @@
 const Engine2D = require('./2d');
 const Camera3D = require('../camera/3d');
 const Sphere = require('../object/sphere');
+const InvisibleError = require('../error/invisible');
 const {vector_magnitude, random, get_rotation_x_matrix, get_rotation_z_matrix, rand_color, spherical2cartesian} = require('../util');
 const {zeros, mag, add, sub, mul, div, dot} = require('../matrix');
-const {min} = Math;
+const {min, max} = Math;
 
 
 class Engine3D extends Engine2D {
@@ -11,7 +12,6 @@ class Engine3D extends Engine2D {
         super(config, ctx);
         this.camera = new Camera3D(config, this);
     }
-
 
     create_object(x, y, m = null, v = null, color = null, controlbox = true) {
         const pos = this.camera.actual_point(x, y);
@@ -37,6 +37,61 @@ class Engine3D extends Engine2D {
         return dir == 1
             ? dot(get_rotation_z_matrix(angles[0]), get_rotation_x_matrix(angles[1]))
             : dot(get_rotation_x_matrix(angles[1], -1), get_rotation_z_matrix(angles[0], -1));
+    }
+
+    redraw_all() {
+        this.ctx.clearRect(0, 0, this.config.W, this.config.H);
+        const orders = [];
+        for (const obj of this.objs) {
+            try {
+                const coords = this.object_coords(obj);
+                const z = this.camera.rotated_coords(coords)[2];
+                orders.push(['object', coords, z, obj.color]);
+            } catch (e) {
+                if (!(e instanceof InvisibleError)) {
+                    throw e;
+                }
+            }
+        }
+        for (const obj of this.objs) {
+            try {
+                const coords = this.direction_coords(obj);
+                const z = this.camera.rotated_coords(add(obj.pos, mul(obj.v, 50)))[2];
+                orders.push(['direction', coords, z]);
+            } catch (e) {
+                if (!(e instanceof InvisibleError)) {
+                    throw e;
+                }
+            }
+        }
+        for (const path of this.paths) {
+            try {
+                const coords = this.path_coords(path);
+                const z1 = this.camera.rotated_coords(path.prev_pos)[2];
+                const z2 = this.camera.rotated_coords(path.pos)[2];
+                orders.push(['path', coords, max(z1, z2)]);
+            } catch (e) {
+                if (!(e instanceof InvisibleError)) {
+                    throw e;
+                }
+            }
+        }
+        orders.sort(function (a, b) {
+            return a[2] - b[2];
+        });
+        for (const [type, coords, z, color] of orders) {
+            switch (type) {
+                case 'object':
+                    this.draw_object(coords, color);
+                    break;
+                case 'direction':
+                    this.draw_direction(coords);
+                    break;
+                case 'path':
+                    this.draw_path(coords);
+                    break;
+            }
+        }
     }
 }
 
