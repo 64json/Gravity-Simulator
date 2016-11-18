@@ -21,24 +21,23 @@ class Engine3D extends Engine2D {
         return super.direction_coords(obj, factor);
     }
 
-    create_object(x, y, m = null, v = null, color = null, controlbox = true) {
+    user_create_object(x, y) {
         const pos = this.camera.actual_point(x, y);
-        if (!m) {
-            let max_r = Sphere.get_r_from_m(this.config.MASS_MAX);
-            for (const obj of this.objs) {
-                max_r = min(max_r, (mag(sub(obj.pos, pos)) - obj.get_r()) / 1.5);
-            }
-            m = Sphere.get_m_from_r(random(Sphere.get_r_from_m(this.config.MASS_MIN), max_r));
+        let max_r = Sphere.get_r_from_m(this.config.MASS_MAX);
+        for (const obj of this.objs) {
+            max_r = min(max_r, (mag(sub(obj.pos, pos)) - obj.get_r()) / 1.5);
         }
-        if (!v) {
-            v = spherical2cartesian(random(this.config.VELOCITY_MAX / 2), random(-180, 180), random(-180, 180));
-        }
-        if (!color) {
-            color = rand_color();
-        }
+        const m = Sphere.get_m_from_r(random(Sphere.get_r_from_m(this.config.MASS_MIN), max_r));
+        const v = spherical2cartesian(random(this.config.VELOCITY_MAX / 2), random(-180, 180), random(-180, 180));
+        const color = rand_color();
         const tag = `sphere${this.objs.length}`;
-        const obj = new Sphere(this.config, m, pos, v, color, tag, this, controlbox);
-        if (controlbox) obj.show_controlbox(x, y);
+        const obj = new Sphere(this.config, m, pos, v, color, tag, this);
+        obj.show_controlbox(x, y);
+        this.objs.push(obj);
+    }
+
+    create_object(tag, pos, m, v, color) {
+        const obj = new Sphere(this.config, m, pos, v, color, tag, this);
         this.objs.push(obj);
     }
 

@@ -20,7 +20,6 @@ const keymap = {
 function on_resize($canvas) {
     config.W = $canvas[0].width = $canvas.width();
     config.H = $canvas[0].height = $canvas.height();
-
 }
 
 function on_click(event, engine) {
@@ -34,7 +33,7 @@ function on_click(event, engine) {
                 return;
             }
         }
-        engine.create_object(x, y);
+        engine.user_create_object(x, y);
     }
 }
 
@@ -42,8 +41,7 @@ function on_key_down(event, engine) {
     const {keyCode} = event;
     if (keyCode == 32) { // space bar
         engine.destroy_controlboxes();
-        engine.animating = !engine.animating;
-        document.title = `${config.TITLE} (${engine.animating ? "Simulating" : "Paused"})`;
+        engine.toggleAnimating();
     } else if (keyCode in keymap && keymap[keyCode] in engine.camera) {
         engine.camera[keymap[keyCode]](keyCode);
     }
@@ -56,6 +54,7 @@ class Simulator {
         const ctx = $canvas[0].getContext('2d');
         on_resize($canvas);
         this.engine = new (config.DIMENSION == 2 ? Engine2D : Engine3D)(config, ctx);
+        if ('init' in config) config.init(this.engine);
         $canvas.resize(e => {
             on_resize($canvas);
         });

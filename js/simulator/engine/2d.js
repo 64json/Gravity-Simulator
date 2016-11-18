@@ -26,6 +26,11 @@ class Engine2D {
         this.fps_count = 0;
     }
 
+    toggleAnimating(){
+        this.animating = !this.animating;
+        document.title = `${this.config.TITLE} (${this.animating ? "Simulating" : "Paused"})`;
+    }
+
     destroy_controlboxes() {
         for (const controlbox of this.controlboxes) {
             controlbox.close();
@@ -126,24 +131,23 @@ class Engine2D {
         }
     }
 
-    create_object(x, y, m = null, v = null, color = null, controlbox = true) {
+    user_create_object(x, y) {
         const pos = this.camera.actual_point(x, y);
-        if (!m) {
-            let max_r = Circle.get_r_from_m(this.config.MASS_MAX);
-            for (const obj of this.objs) {
-                max_r = min(max_r, (mag(sub(obj.pos, pos)) - obj.get_r()) / 1.5)
-            }
-            m = Circle.get_m_from_r(random(Circle.get_r_from_m(this.config.MASS_MIN), max_r));
+        let max_r = Circle.get_r_from_m(this.config.MASS_MAX);
+        for (const obj of this.objs) {
+            max_r = min(max_r, (mag(sub(obj.pos, pos)) - obj.get_r()) / 1.5)
         }
-        if (!v) {
-            v = polar2cartesian(random(this.config.VELOCITY_MAX / 2), random(-180, 180))
-        }
-        if (!color) {
-            color = rand_color();
-        }
+        const m = Circle.get_m_from_r(random(Circle.get_r_from_m(this.config.MASS_MIN), max_r));
+        const v = polar2cartesian(random(this.config.VELOCITY_MAX / 2), random(-180, 180));
+        const color = rand_color();
         const tag = `circle${this.objs.length}`;
         const obj = new Circle(this.config, m, pos, v, color, tag, this);
-        if (controlbox) obj.show_controlbox(x, y);
+        obj.show_controlbox(x, y);
+        this.objs.push(obj);
+    }
+
+    create_object(tag, pos, m, v, color) {
+        const obj = new Circle(this.config, m, pos, v, color, tag, this);
         this.objs.push(obj);
     }
 
@@ -186,9 +190,7 @@ class Engine2D {
         for (const obj of this.objs) {
             obj.calculate_velocity();
         }
-
         this.elastic_collision();
-
         for (const obj of this.objs) {
             obj.calculate_position();
             this.create_path(obj);
