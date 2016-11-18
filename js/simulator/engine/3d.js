@@ -13,7 +13,7 @@ class Engine3D extends Engine2D {
     }
 
 
-    create_object(x, y, m = None, v = None, color = None, controlbox = True) {
+    create_object(x, y, m = null, v = null, color = null, controlbox = true) {
         const pos = this.camera.actual_point(x, y);
         if (!m) {
             let max_r = Sphere.get_r_from_m(this.config.MASS_MAX);
@@ -35,8 +35,8 @@ class Engine3D extends Engine2D {
 
     get_rotation_matrix(angles, dir = 1) {
         return dir == 1
-            ? get_rotation_z_matrix(angles[0]) * get_rotation_x_matrix(angles[1])
-            : get_rotation_x_matrix(angles[1], -1) * get_rotation_z_matrix(angles[0], -1);
+            ? dot(get_rotation_z_matrix(angles[0]), get_rotation_x_matrix(angles[1]))
+            : dot(get_rotation_x_matrix(angles[1], -1), get_rotation_z_matrix(angles[0], -1));
     }
 }
 

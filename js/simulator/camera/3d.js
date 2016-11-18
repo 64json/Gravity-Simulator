@@ -19,7 +19,7 @@ class Camera3D extends Camera2D {
         this.refresh();
     }
 
-    adjust_coord(coord, allow_invisible = False) {
+    adjust_coord(coord, allow_invisible = false) {
         const Rx = get_rotation_x_matrix(deg2rad(this.theta));
         const Ry = get_rotation_y_matrix(deg2rad(this.phi));
         const c = rotate(rotate(coord, Rx), Ry);

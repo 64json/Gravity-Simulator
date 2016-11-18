@@ -155,6 +155,7 @@ class Engine2D {
                 if (d < o1.get_r() + o2.get_r()) {
                     const R = this.get_rotation_matrix(angles);
                     const R_ = this.get_rotation_matrix(angles, -1);
+                    console.log(R, R_)
 
                     const v_temp = [rotate(o1.v, R), rotate(o2.v, R)];
                     const v_final = [v_temp[0].slice(), v_temp[1].slice()];
