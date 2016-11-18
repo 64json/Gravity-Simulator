@@ -45,7 +45,10 @@ module.exports = {
         });
     },
 
-    dot: (a, b) => {
+    dot: (a, b, dir = 1) => {
+        if (dir == -1) {
+            [a, b] = [b, a];
+        }
         const a_r = a.length;
         const a_c = a[0].length;
         const b_c = b[0].length;

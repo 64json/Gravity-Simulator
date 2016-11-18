@@ -33,10 +33,10 @@ function TEST(c) {
     return extend(true, EMPTY_3D(c), {
         init: (engine) => {
             engine.create_object('ball1', [-150, 0, 0], 1000000, [0, 0, 0], 'green');
-            engine.create_object('ball2', [150, 0, 0], 1000000, [0, 0, 0], 'blue');
+            engine.create_object('ball2', [50, 0, 0], 10000, [0, 0, 0], 'blue');
             engine.toggleAnimating();
         }
     });
 }
 
-module.exports = TEST;
+module.exports = EMPTY_2D;

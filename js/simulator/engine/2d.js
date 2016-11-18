@@ -26,7 +26,7 @@ class Engine2D {
         this.fps_count = 0;
     }
 
-    toggleAnimating(){
+    toggleAnimating() {
         this.animating = !this.animating;
         document.title = `${this.config.TITLE} (${this.animating ? "Simulating" : "Paused"})`;
     }
@@ -155,6 +155,10 @@ class Engine2D {
         return get_rotation_matrix(angles[0], dir);
     }
 
+    get_pivot_axis() {
+        return 0;
+    }
+
     elastic_collision() {
         const dimension = this.config.DIMENSION;
         for (let i = 0; i < this.objs.length; i++) {
@@ -168,17 +172,18 @@ class Engine2D {
                 if (d < o1.get_r() + o2.get_r()) {
                     const R = this.get_rotation_matrix(angles);
                     const R_ = this.get_rotation_matrix(angles, -1);
+                    const i = this.get_pivot_axis();
 
                     const v_temp = [rotate(o1.v, R), rotate(o2.v, R)];
                     const v_final = [v_temp[0].slice(), v_temp[1].slice()];
-                    v_final[0][0] = ((o1.m - o2.m) * v_temp[0][0] + 2 * o2.m * v_temp[1][0]) / (o1.m + o2.m);
-                    v_final[1][0] = ((o2.m - o1.m) * v_temp[1][0] + 2 * o1.m * v_temp[0][0]) / (o1.m + o2.m);
+                    v_final[0][i] = ((o1.m - o2.m) * v_temp[0][i] + 2 * o2.m * v_temp[1][i]) / (o1.m + o2.m);
+                    v_final[1][i] = ((o2.m - o1.m) * v_temp[1][i] + 2 * o1.m * v_temp[0][i]) / (o1.m + o2.m);
                     o1.v = rotate(v_final[0], R_);
                     o2.v = rotate(v_final[1], R_);
 
                     const pos_temp = [zeros(dimension), rotate(collision, R)];
-                    pos_temp[0][0] += v_final[0][0];
-                    pos_temp[1][0] += v_final[1][0];
+                    pos_temp[0][i] += v_final[0][i];
+                    pos_temp[1][i] += v_final[1][i];
                     o1.pos = add(o1.pos, rotate(pos_temp[0], R_));
                     o2.pos = add(o1.pos, rotate(pos_temp[1], R_));
                 }

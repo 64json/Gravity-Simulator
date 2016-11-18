@@ -2,7 +2,7 @@ const Engine2D = require('./2d');
 const Camera3D = require('../camera/3d');
 const Sphere = require('../object/sphere');
 const InvisibleError = require('../error/invisible');
-const {vector_magnitude, random, get_rotation_x_matrix, get_rotation_z_matrix, rand_color, spherical2cartesian} = require('../util');
+const {vector_magnitude, random, get_rotation_x_matrix, get_rotation_y_matrix, get_rotation_z_matrix, rand_color, spherical2cartesian, rotate} = require('../util');
 const {zeros, mag, add, sub, mul, div, dot} = require('../matrix');
 const {min, max} = Math;
 
@@ -42,9 +42,11 @@ class Engine3D extends Engine2D {
     }
 
     get_rotation_matrix(angles, dir = 1) {
-        return dir == 1
-            ? dot(get_rotation_z_matrix(angles[0]), get_rotation_x_matrix(angles[1]))
-            : dot(get_rotation_x_matrix(angles[1], -1), get_rotation_z_matrix(angles[0], -1));
+        return dot(get_rotation_z_matrix(angles[0], dir), get_rotation_y_matrix(angles[1], dir), dir);
+    }
+
+    get_pivot_axis() {
+        return 2;
     }
 
     redraw_all() {

@@ -101,9 +101,9 @@ const Util = {
         const sin = Math.sin(x * dir);
         const cos = Math.cos(x * dir);
         return [
-            [cos, 0, -sin],
+            [cos, 0, sin],
             [0, 1, 0],
-            [sin, 0, cos]
+            [-sin, 0, cos]
         ];
     },
 
