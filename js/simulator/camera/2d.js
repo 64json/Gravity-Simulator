@@ -14,7 +14,11 @@ class Camera2D {
         this.lastTime = 0;
         this.lastKey = null;
         this.combo = 0;
-        this.center = [config.W / 2, config.H / 2];
+        this.resize();
+    }
+
+    resize() {
+        this.center = [this.config.W / 2, this.config.H / 2];
     }
 
     getCoordStep(key) {

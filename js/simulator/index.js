@@ -17,12 +17,13 @@ const keymap = {
     68: 'rotateRight' // d
 };
 
-function on_resize($canvas) {
+function onResize(engine, $canvas) {
     config.W = $canvas[0].width = $canvas.width();
     config.H = $canvas[0].height = $canvas.height();
+    if (engine) engine.camera.resize();
 }
 
-function on_click(event, engine) {
+function onClick(event, engine) {
     const x = event.pageX;
     const y = event.pageY;
     if (!engine.animating) {
@@ -39,7 +40,7 @@ function on_click(event, engine) {
     }
 }
 
-function on_key_down(event, engine) {
+function onKeyDown(event, engine) {
     const {keyCode} = event;
     if (keyCode == 32) { // space bar
         engine.destroyControlBoxes();
@@ -54,17 +55,17 @@ class Simulator {
         config = preset({});
         const $canvas = $('canvas');
         const ctx = $canvas[0].getContext('2d');
-        on_resize($canvas);
+        onResize(this.engine, $canvas);
         this.engine = new (config.DIMENSION == 2 ? Engine2D : Engine3D)(config, ctx);
         if ('init' in config) config.init(this.engine);
-        $canvas.resize(e => {
-            on_resize($canvas);
+        $(window).resize(e => {
+            onResize(this.engine, $canvas);
         });
         $canvas.click(e => {
-            on_click(e, this.engine);
+            onClick(e, this.engine);
         });
         $('body').keydown(e => {
-            on_key_down(e, this.engine);
+            onKeyDown(e, this.engine);
         });
     }
 
