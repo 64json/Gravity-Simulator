@@ -1,8 +1,7 @@
 const Circle = require('../object/circle');
 const Camera2D = require('../camera/2d');
-const InvisibleError = require('../error/invisible');
-const {vector_magnitude, rotate, now, random, polar2cartesian, rand_color, get_rotation_matrix, cartesian2auto} = require('../util');
-const {zeros, mag, add, sub, mul, div, dot} = require('../matrix');
+const {rotate, now, random, polar2cartesian, rand_color, get_rotation_matrix, cartesian2auto, skip_invisible_error} = require('../util');
+const {zeros, mag, add, sub, mul} = require('../matrix');
 const {min, max} = Math;
 
 
@@ -68,7 +67,7 @@ class Engine2D {
     }
 
     draw_object(c, color = null) {
-        try {
+        skip_invisible_error(() => {
             color = color || c.color;
             if (c instanceof Circle) {
                 c = this.object_coords(c);
@@ -77,16 +76,11 @@ class Engine2D {
             this.ctx.arc(c[0], c[1], c[2], 0, 2 * Math.PI, false);
             this.ctx.fillStyle = color;
             this.ctx.fill();
-        } catch (e) {
-            if (!(e instanceof InvisibleError)) {
-                console.error(e);
-                throw new Error();
-            }
-        }
+        });
     }
 
     draw_direction(c) {
-        try {
+        skip_invisible_error(() => {
             if (c instanceof Circle) {
                 c = this.direction_coords(c);
             }
@@ -95,16 +89,11 @@ class Engine2D {
             this.ctx.lineTo(c[2], c[3]);
             this.ctx.strokeStyle = '#000000';
             this.ctx.stroke();
-        } catch (e) {
-            if (!(e instanceof InvisibleError)) {
-                console.error(e);
-                throw new Error();
-            }
-        }
+        });
     }
 
     draw_path(c) {
-        try {
+        skip_invisible_error(() => {
             if (c instanceof Path) {
                 c = this.path_coords(c);
             }
@@ -113,12 +102,7 @@ class Engine2D {
             this.ctx.lineTo(c[2], c[3]);
             this.ctx.strokeStyle = '#dddddd';
             this.ctx.stroke();
-        } catch (e) {
-            if (!(e instanceof InvisibleError)) {
-                console.error(e);
-                throw new Error();
-            }
-        }
+        });
     }
 
     create_path(obj) {

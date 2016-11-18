@@ -1,7 +1,6 @@
 const Engine2D = require('./engine/2d');
 const Engine3D = require('./engine/3d');
-const InvisibleError = require('./error/invisible');
-const {get_distance} = require('./util');
+const {get_distance, skip_invisible_error} = require('./util');
 
 
 let config = null;
@@ -28,18 +27,13 @@ function on_click(event, engine) {
     const y = event.pageY;
     if (!engine.animating) {
         for (const obj of engine.objs) {
-            try {
-                const [cx, cy, r] = engine.object_coords(obj);
-                if (get_distance(cx, cy, x, y) < r) {
-                    obj.show_controlbox(x, y);
-                    return;
-                }
-            } catch (e) {
-                if (!(e instanceof InvisibleError)) {
-                    console.error(e);
-                    throw new Error();
-                }
-            }
+            if (skip_invisible_error(() => {
+                    const [cx, cy, r] = engine.object_coords(obj);
+                    if (get_distance(cx, cy, x, y) < r) {
+                        obj.show_controlbox(x, y);
+                        return true;
+                    }
+                })) return;
         }
         engine.user_create_object(x, y);
     }

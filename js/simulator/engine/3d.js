@@ -1,10 +1,9 @@
 const Engine2D = require('./2d');
 const Camera3D = require('../camera/3d');
 const Sphere = require('../object/sphere');
-const InvisibleError = require('../error/invisible');
-const {vector_magnitude, random, get_rotation_x_matrix, get_rotation_y_matrix, get_rotation_z_matrix, rand_color, spherical2cartesian, rotate} = require('../util');
-const {zeros, mag, add, sub, mul, div, dot} = require('../matrix');
-const {min, max} = Math;
+const {random, get_rotation_y_matrix, get_rotation_z_matrix, rand_color, spherical2cartesian, skip_invisible_error} = require('../util');
+const {mag, sub, dot} = require('../matrix');
+const {min} = Math;
 
 
 class Engine3D extends Engine2D {
@@ -53,40 +52,25 @@ class Engine3D extends Engine2D {
         this.ctx.clearRect(0, 0, this.config.W, this.config.H);
         const orders = [];
         for (const obj of this.objs) {
-            try {
+            skip_invisible_error(() => {
                 const coords = this.object_coords(obj);
                 const z = coords.pop();
                 orders.push(['object', coords, z, obj.color]);
-            } catch (e) {
-                if (!(e instanceof InvisibleError)) {
-                    console.error(e);
-                    throw new Error();
-                }
-            }
+            });
         }
         for (const obj of this.objs) {
-            try {
+            skip_invisible_error(() => {
                 const coords = this.direction_coords(obj);
                 const z = coords.pop();
                 orders.push(['direction', coords, z]);
-            } catch (e) {
-                if (!(e instanceof InvisibleError)) {
-                    console.error(e);
-                    throw new Error();
-                }
-            }
+            });
         }
         for (const path of this.paths) {
-            try {
+            skip_invisible_error(() => {
                 const coords = this.path_coords(path);
                 const z = coords.pop();
                 orders.push(['path', coords, z]);
-            } catch (e) {
-                if (!(e instanceof InvisibleError)) {
-                    console.error(e);
-                    throw new Error();
-                }
-            }
+            });
         }
         orders.sort(function (a, b) {
             return a[2] - b[2];

@@ -1,4 +1,5 @@
-const {zeros, mag, add, sub, mul, div, dot} = require('./matrix');
+const InvisibleError = require('./error/invisible');
+const {mag, dot} = require('./matrix');
 
 const Util = {
     square: (x) => {
@@ -115,6 +116,18 @@ const Util = {
             [sin, cos, 0],
             [0, 0, 1]
         ];
+    },
+
+    skip_invisible_error: func => {
+        try {
+            return func();
+        } catch (e) {
+            if (!(e instanceof InvisibleError)) {
+                console.error(e);
+                throw new Error();
+            }
+        }
+        return null;
     }
 };
 
