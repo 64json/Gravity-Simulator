@@ -35,7 +35,7 @@ const Util = {
         const rho = mag([x, y, z]);
         return [
             rho,
-            Math.atan2(y, x),
+            Math.atan2(x, y),
             rho != 0 ? Math.acos(z / rho) : 0
         ];
     },
@@ -75,7 +75,7 @@ const Util = {
     },
 
     rand_color: () => {
-        return '#' + Math.floor(Math.random() * 16777215).toString(16);
+        return '#' + Math.floor(0x1000000 + Math.random() * 0x1000000).toString(16).substring(1);
     },
 
     get_rotation_matrix: (x, dir = 1) => {

@@ -13,7 +13,8 @@ function EMPTY_2D(c) {
         'G': 0.1,
         'MASS_MIN': 1,
         'MASS_MAX': 4e4,
-        'VELOCITY_MAX': 10
+        'VELOCITY_MAX': 10,
+        'DIRECTION_LENGTH': 50
     });
 }
 
@@ -28,4 +29,4 @@ function EMPTY_3D(c) {
     });
 }
 
-module.exports = EMPTY_2D;
+module.exports = EMPTY_3D;

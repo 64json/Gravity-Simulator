@@ -14,8 +14,10 @@ class Engine3D extends Engine2D {
     }
 
     direction_coords(obj) {
-        let c = this.camera.rotated_coords(obj.pos);
-        let factor = min(50, (this.camera.z - c[2] - 1) / obj.v[2]);
+        const c = this.camera.rotated_coords(obj.pos);
+        const adjustedFactor = (this.camera.z - c[2] - 1) / obj.v[2];
+        let factor = this.config.DIRECTION_LENGTH;
+        if (adjustedFactor > 0) factor = min(factor, adjustedFactor);
         return super.direction_coords(obj, factor);
     }
 

@@ -50,7 +50,7 @@ class Engine2D {
         return coords.concat(r).concat(z);
     }
 
-    direction_coords(obj, factor = 50) {
+    direction_coords(obj, factor = this.config.DIRECTION_LENGTH) {
         const {coords: c1} = this.camera.adjust_coords(obj.pos);
         const {coords: c2, z} = this.camera.adjust_coords(add(obj.pos, mul(obj.v, factor)));
         return c1.concat(c2).concat(z);
