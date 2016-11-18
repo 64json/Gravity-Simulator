@@ -19,21 +19,24 @@ class Camera3D extends Camera2D {
         this.refresh();
     }
 
-    rotated_coords(coords) {
+    rotated_coords(c) {
         const Rx = get_rotation_x_matrix(deg2rad(this.theta));
         const Ry = get_rotation_y_matrix(deg2rad(this.phi));
-        return rotate(rotate(coords, Rx), Ry);
+        return rotate(rotate(c, Rx), Ry);
     }
 
-    adjust_coords(coords) {
-        const c = this.rotated_coords(coords);
-        const zoom = this.get_zoom(c.pop());
-        return add(this.center, mul(sub(c, [this.x, this.y]), zoom));
+    adjust_coords(c) {
+        c = this.rotated_coords(c);
+        const z = c.pop();
+        const zoom = this.get_zoom(z);
+        const coords = add(this.center, mul(sub(c, [this.x, this.y]), zoom));
+        return {coords, z};
     }
 
-    adjust_radius(coords, radius) {
-        const c = this.rotated_coords(coords);
-        const zoom = this.get_zoom(c.pop());
+    adjust_radius(c, radius) {
+        c = this.rotated_coords(c);
+        const z = c.pop();
+        const zoom = this.get_zoom(z);
         return radius * zoom;
     }
 

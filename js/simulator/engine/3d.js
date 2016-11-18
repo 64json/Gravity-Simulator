@@ -14,13 +14,9 @@ class Engine3D extends Engine2D {
     }
 
     direction_coords(obj) {
-        let factor = 50;
         let c = this.camera.rotated_coords(obj.pos);
-        const minFactor = (this.camera.z - c[2] - 1) / obj.v[2];
-        if (minFactor > 0) factor = min(factor, minFactor);
-        const [cx, cy] = this.camera.adjust_coords(obj.pos);
-        const [dx, dy] = this.camera.adjust_coords(add(obj.pos, mul(obj.v, factor)));
-        return [cx, cy, dx, dy];
+        let factor = min(50, (this.camera.z - c[2] - 1) / obj.v[2]);
+        return super.direction_coords(obj, factor);
     }
 
     create_object(x, y, m = null, v = null, color = null, controlbox = true) {
@@ -28,7 +24,7 @@ class Engine3D extends Engine2D {
         if (!m) {
             let max_r = Sphere.get_r_from_m(this.config.MASS_MAX);
             for (const obj of this.objs) {
-                max_r = min(max_r, (mag(obj.pos - pos) - obj.get_r()) / 1.5);
+                max_r = min(max_r, (mag(sub(obj.pos, pos)) - obj.get_r()) / 1.5);
             }
             m = Sphere.get_m_from_r(random(Sphere.get_r_from_m(this.config.MASS_MIN), max_r));
         }
@@ -55,34 +51,36 @@ class Engine3D extends Engine2D {
         for (const obj of this.objs) {
             try {
                 const coords = this.object_coords(obj);
-                const z = this.camera.rotated_coords(coords)[2];
+                const z = coords.pop();
                 orders.push(['object', coords, z, obj.color]);
             } catch (e) {
                 if (!(e instanceof InvisibleError)) {
-                    throw e;
+                    console.error(e);
+                    throw new Error();
                 }
             }
         }
         for (const obj of this.objs) {
             try {
                 const coords = this.direction_coords(obj);
-                const z = this.camera.rotated_coords(add(obj.pos, mul(obj.v, 50)))[2];
+                const z = coords.pop();
                 orders.push(['direction', coords, z]);
             } catch (e) {
                 if (!(e instanceof InvisibleError)) {
-                    throw e;
+                    console.error(e);
+                    throw new Error();
                 }
             }
         }
         for (const path of this.paths) {
             try {
                 const coords = this.path_coords(path);
-                const z1 = this.camera.rotated_coords(path.prev_pos)[2];
-                const z2 = this.camera.rotated_coords(path.pos)[2];
-                orders.push(['path', coords, max(z1, z2)]);
+                const z = coords.pop();
+                orders.push(['path', coords, z]);
             } catch (e) {
                 if (!(e instanceof InvisibleError)) {
-                    throw e;
+                    console.error(e);
+                    throw new Error();
                 }
             }
         }

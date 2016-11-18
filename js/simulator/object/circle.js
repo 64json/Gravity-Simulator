@@ -68,7 +68,8 @@ class Circle {
 
     show_controlbox() {
         try {
-            this.controlbox.tk.lift();
+            const $controlBox = this.controlbox.$controlBox;
+            $controlBox.nextUntil('.control-box.template').insertBefore($controlBox);
         } catch (e) {
             const margin = 1.5;
 

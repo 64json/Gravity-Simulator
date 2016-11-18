@@ -3,7 +3,7 @@ const Camera2D = require('../camera/2d');
 const InvisibleError = require('../error/invisible');
 const {vector_magnitude, rotate, now, random, polar2cartesian, rand_color, get_rotation_matrix, cartesian2auto} = require('../util');
 const {zeros, mag, add, sub, mul, div, dot} = require('../matrix');
-const {min} = Math;
+const {min, max} = Math;
 
 
 class Path {
@@ -46,20 +46,20 @@ class Engine2D {
 
     object_coords(obj) {
         const r = this.camera.adjust_radius(obj.pos, obj.get_r());
-        const [x, y] = this.camera.adjust_coords(obj.pos);
-        return [x, y, r];
+        const {coords, z} = this.camera.adjust_coords(obj.pos);
+        return coords.concat(r).concat(z);
     }
 
-    direction_coords(obj) {
-        const [cx, cy] = this.camera.adjust_coords(obj.pos);
-        const [dx, dy] = this.camera.adjust_coords(add(obj.pos, mul(obj.v, 50)));
-        return [cx, cy, dx, dy];
+    direction_coords(obj, factor = 50) {
+        const {coords: c1} = this.camera.adjust_coords(obj.pos);
+        const {coords: c2, z} = this.camera.adjust_coords(add(obj.pos, mul(obj.v, factor)));
+        return c1.concat(c2).concat(z);
     }
 
     path_coords(obj) {
-        const [fx, fy] = this.camera.adjust_coords(obj.prev_pos);
-        const [tx, ty] = this.camera.adjust_coords(obj.pos);
-        return [fx, fy, tx, ty];
+        const {coords: c1, z1} = this.camera.adjust_coords(obj.prev_pos);
+        const {coords: c2, z2} = this.camera.adjust_coords(obj.pos);
+        return c1.concat(c2, max(z1, z2));
     }
 
     draw_object(c, color = null) {
@@ -73,7 +73,8 @@ class Engine2D {
             this.ctx.fill();
         } catch (e) {
             if (!(e instanceof InvisibleError)) {
-                throw e;
+                console.error(e);
+                throw new Error();
             }
         }
     }
@@ -90,7 +91,8 @@ class Engine2D {
             this.ctx.stroke();
         } catch (e) {
             if (!(e instanceof InvisibleError)) {
-                throw e;
+                console.error(e);
+                throw new Error();
             }
         }
     }
@@ -107,7 +109,8 @@ class Engine2D {
             this.ctx.stroke();
         } catch (e) {
             if (!(e instanceof InvisibleError)) {
-                throw e;
+                console.error(e);
+                throw new Error();
             }
         }
     }
@@ -159,7 +162,6 @@ class Engine2D {
                 if (d < o1.get_r() + o2.get_r()) {
                     const R = this.get_rotation_matrix(angles);
                     const R_ = this.get_rotation_matrix(angles, -1);
-                    console.log(R, R_)
 
                     const v_temp = [rotate(o1.v, R), rotate(o2.v, R)];
                     const v_final = [v_temp[0].slice(), v_temp[1].slice()];
