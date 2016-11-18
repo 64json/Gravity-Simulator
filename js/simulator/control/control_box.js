@@ -22,7 +22,7 @@ class ControlBox {
         this.$controlBox.remove();
     }
 
-    is_opened() {
+    isOpen() {
         return this.$controlBox[0].parentNode;
     }
 }

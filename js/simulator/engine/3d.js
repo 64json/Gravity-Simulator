@@ -1,7 +1,7 @@
 const Engine2D = require('./2d');
 const Camera3D = require('../camera/3d');
 const Sphere = require('../object/sphere');
-const {random, get_rotation_y_matrix, get_rotation_z_matrix, rand_color, spherical2cartesian, skip_invisible_error} = require('../util');
+const {random, getYRotationMatrix, getZRotationMatrix, randColor, spherical2cartesian, skipInvisibleError} = require('../util');
 const {mag, sub, dot} = require('../matrix');
 const {min} = Math;
 
@@ -12,62 +12,62 @@ class Engine3D extends Engine2D {
         this.camera = new Camera3D(config, this);
     }
 
-    direction_coords(obj) {
-        const c = this.camera.rotated_coords(obj.pos);
+    directionCoords(obj) {
+        const c = this.camera.rotatedCoords(obj.pos);
         const adjustedFactor = (this.camera.z - c[2] - 1) / obj.v[2];
         let factor = this.config.DIRECTION_LENGTH;
         if (adjustedFactor > 0) factor = min(factor, adjustedFactor);
-        return super.direction_coords(obj, factor);
+        return super.directionCoords(obj, factor);
     }
 
-    user_create_object(x, y) {
-        const pos = this.camera.actual_point(x, y);
-        let max_r = Sphere.get_r_from_m(this.config.MASS_MAX);
+    userCreateObject(x, y) {
+        const pos = this.camera.actualPoint(x, y);
+        let maxR = Sphere.getRadiusFromMass(this.config.MASS_MAX);
         for (const obj of this.objs) {
-            max_r = min(max_r, (mag(sub(obj.pos, pos)) - obj.get_r()) / 1.5);
+            maxR = min(maxR, (mag(sub(obj.pos, pos)) - obj.getRadius()) / 1.5);
         }
-        const m = Sphere.get_m_from_r(random(Sphere.get_r_from_m(this.config.MASS_MIN), max_r));
+        const m = Sphere.getMassFromRadius(random(Sphere.getRadiusFromMass(this.config.MASS_MIN), maxR));
         const v = spherical2cartesian(random(this.config.VELOCITY_MAX / 2), random(-180, 180), random(-180, 180));
-        const color = rand_color();
+        const color = randColor();
         const tag = `sphere${this.objs.length}`;
         const obj = new Sphere(this.config, m, pos, v, color, tag, this);
-        obj.show_controlbox(x, y);
+        obj.showControlBox(x, y);
         this.objs.push(obj);
     }
 
-    create_object(tag, pos, m, v, color) {
+    createObject(tag, pos, m, v, color) {
         const obj = new Sphere(this.config, m, pos, v, color, tag, this);
         this.objs.push(obj);
     }
 
-    get_rotation_matrix(angles, dir = 1) {
-        return dot(get_rotation_z_matrix(angles[0], dir), get_rotation_y_matrix(angles[1], dir), dir);
+    getRotationMatrix(angles, dir = 1) {
+        return dot(getZRotationMatrix(angles[0], dir), getYRotationMatrix(angles[1], dir), dir);
     }
 
-    get_pivot_axis() {
+    getPivotAxis() {
         return 2;
     }
 
-    redraw_all() {
+    redrawAll() {
         this.ctx.clearRect(0, 0, this.config.W, this.config.H);
         const orders = [];
         for (const obj of this.objs) {
-            skip_invisible_error(() => {
-                const coords = this.object_coords(obj);
+            skipInvisibleError(() => {
+                const coords = this.objectCoords(obj);
                 const z = coords.pop();
                 orders.push(['object', coords, z, obj.color]);
             });
         }
         for (const obj of this.objs) {
-            skip_invisible_error(() => {
-                const coords = this.direction_coords(obj);
+            skipInvisibleError(() => {
+                const coords = this.directionCoords(obj);
                 const z = coords.pop();
                 orders.push(['direction', coords, z]);
             });
         }
         for (const path of this.paths) {
-            skip_invisible_error(() => {
-                const coords = this.path_coords(path);
+            skipInvisibleError(() => {
+                const coords = this.pathCoords(path);
                 const z = coords.pop();
                 orders.push(['path', coords, z]);
             });
@@ -78,13 +78,13 @@ class Engine3D extends Engine2D {
         for (const [type, coords, z, color] of orders) {
             switch (type) {
                 case 'object':
-                    this.draw_object(coords, color);
+                    this.drawObject(coords, color);
                     break;
                 case 'direction':
-                    this.draw_direction(coords);
+                    this.drawDirection(coords);
                     break;
                 case 'path':
-                    this.draw_path(coords);
+                    this.drawPath(coords);
                     break;
             }
         }

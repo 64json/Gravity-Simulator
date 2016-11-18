@@ -29,11 +29,11 @@ $('body').mouseup(function (e) {
     $moving = null;
 });
 
-const {deg2rad, get_rotation_x_matrix, get_rotation_y_matrix, rotate} = require('./simulator/util');
+const {deg2rad, getXRotationMatrix, getYRotationMatrix, rotate} = require('./simulator/util');
 const angleX = deg2rad(30);
 const angleY = deg2rad(50);
-const Rx = get_rotation_x_matrix(angleX);
-const Rx_ = get_rotation_x_matrix(angleX, -1);
-const Ry = get_rotation_y_matrix(angleY);
-const Ry_ = get_rotation_y_matrix(angleY, -1);
+const Rx = getXRotationMatrix(angleX);
+const Rx_ = getXRotationMatrix(angleX, -1);
+const Ry = getYRotationMatrix(angleY);
+const Ry_ = getYRotationMatrix(angleY, -1);
 console.log(rotate(rotate(rotate(rotate([-5, 8, 3], Rx), Ry), Ry_), Rx_));

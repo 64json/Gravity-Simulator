@@ -1,6 +1,6 @@
 const Engine2D = require('./engine/2d');
 const Engine3D = require('./engine/3d');
-const {get_distance, skip_invisible_error} = require('./util');
+const {getDistance, skipInvisibleError} = require('./util');
 
 
 let config = null;
@@ -9,12 +9,12 @@ const keymap = {
     40: 'down',
     37: 'left',
     39: 'right',
-    90: 'zoom_in', // z
-    88: 'zoom_out', // x
-    87: 'rotate_up', // w
-    83: 'rotate_down', // s
-    65: 'rotate_left', // a
-    68: 'rotate_right' // d
+    90: 'zoomIn', // z
+    88: 'zoomOut', // x
+    87: 'rotateUp', // w
+    83: 'rotateDown', // s
+    65: 'rotateLeft', // a
+    68: 'rotateRight' // d
 };
 
 function on_resize($canvas) {
@@ -27,22 +27,22 @@ function on_click(event, engine) {
     const y = event.pageY;
     if (!engine.animating) {
         for (const obj of engine.objs) {
-            if (skip_invisible_error(() => {
-                    const [cx, cy, r] = engine.object_coords(obj);
-                    if (get_distance(cx, cy, x, y) < r) {
-                        obj.show_controlbox(x, y);
+            if (skipInvisibleError(() => {
+                    const [cx, cy, r] = engine.objectCoords(obj);
+                    if (getDistance(cx, cy, x, y) < r) {
+                        obj.showControlBox(x, y);
                         return true;
                     }
                 })) return;
         }
-        engine.user_create_object(x, y);
+        engine.userCreateObject(x, y);
     }
 }
 
 function on_key_down(event, engine) {
     const {keyCode} = event;
     if (keyCode == 32) { // space bar
-        engine.destroy_controlboxes();
+        engine.destroyControlBoxes();
         engine.toggleAnimating();
     } else if (keyCode in keymap && keymap[keyCode] in engine.camera) {
         engine.camera[keymap[keyCode]](keyCode);

@@ -11,47 +11,47 @@ class Sphere extends Circle {
      * https://en.wikipedia.org/wiki/Spherical_coordinate_system
      */
 
-    get_r() {
-        return Sphere.get_r_from_m(this.m);
+    getRadius() {
+        return Sphere.getRadiusFromMass(this.m);
     }
 
-    control_pos(e) {
-        const x = this.pos_x_controller.get();
-        const y = this.pos_y_controller.get();
-        const z = this.pos_z_controller.get();
+    controlPos(e) {
+        const x = this.posXController.get();
+        const y = this.posYController.get();
+        const z = this.posZController.get();
         this.pos = [x, y, z];
     }
 
-    control_v(e) {
-        const phi = deg2rad(this.v_phi_controller.get());
-        const theta = deg2rad(this.v_theta_controller.get());
-        const rho = this.v_rho_controller.get();
+    controlV(e) {
+        const phi = deg2rad(this.vPhiController.get());
+        const theta = deg2rad(this.vThetaController.get());
+        const rho = this.vRhoController.get();
         this.v = spherical2cartesian(rho, phi, theta);
     }
 
     setup_controllers(pos_range, m, v, v_range) {
         super.setup_controllers(pos_range, m, v, v_range);
-        this.pos_z_controller = new Controller(this, "Position z", -pos_range, pos_range, this.pos[2], this.control_pos);
-        this.v_theta_controller = new Controller(this, "Velocity θ", -180, 180, rad2deg(v[2]), this.control_v);
+        this.posZController = new Controller(this, "Position z", -pos_range, pos_range, this.pos[2], this.controlPos);
+        this.vThetaController = new Controller(this, "Velocity θ", -180, 180, rad2deg(v[2]), this.controlV);
     }
 
-    get_controllers() {
+    getControllers() {
         return [
-            this.m_controller,
-            this.pos_x_controller,
-            this.pos_y_controller,
-            this.pos_z_controller,
-            this.v_rho_controller,
-            this.v_phi_controller,
-            this.v_theta_controller
+            this.mController,
+            this.posXController,
+            this.posYController,
+            this.posZController,
+            this.vRhoController,
+            this.vPhiController,
+            this.vThetaController
         ];
     }
 
-    static get_r_from_m(m) {
+    static getRadiusFromMass(m) {
         return pow(m, 1 / 3);
     }
 
-    static get_m_from_r(r) {
+    static getMassFromRadius(r) {
         return cube(r);
     }
 }

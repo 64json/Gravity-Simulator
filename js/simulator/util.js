@@ -55,7 +55,7 @@ const Util = {
         return deg / 180 * Math.PI;
     },
 
-    get_distance: (x0, y0, x1, y1) => {
+    getDistance: (x0, y0, x1, y1) => {
         return mag([x1 - x0, y1 - y0]);
     },
 
@@ -75,11 +75,11 @@ const Util = {
         return Math.random() * (max - min) + min;
     },
 
-    rand_color: () => {
+    randColor: () => {
         return '#' + Math.floor(0x1000000 + Math.random() * 0x1000000).toString(16).substring(1);
     },
 
-    get_rotation_matrix: (x, dir = 1) => {
+    getRotationMatrix: (x, dir = 1) => {
         const sin = Math.sin(x * dir);
         const cos = Math.cos(x * dir);
         return [
@@ -88,7 +88,7 @@ const Util = {
         ];
     },
 
-    get_rotation_x_matrix: (x, dir = 1) => {
+    getXRotationMatrix: (x, dir = 1) => {
         const sin = Math.sin(x * dir);
         const cos = Math.cos(x * dir);
         return [
@@ -98,7 +98,7 @@ const Util = {
         ];
     },
 
-    get_rotation_y_matrix: (x, dir = 1) => {
+    getYRotationMatrix: (x, dir = 1) => {
         const sin = Math.sin(x * dir);
         const cos = Math.cos(x * dir);
         return [
@@ -108,7 +108,7 @@ const Util = {
         ];
     },
 
-    get_rotation_z_matrix: (x, dir = 1) => {
+    getZRotationMatrix: (x, dir = 1) => {
         const sin = Math.sin(x * dir);
         const cos = Math.cos(x * dir);
         return [
@@ -118,7 +118,7 @@ const Util = {
         ];
     },
 
-    skip_invisible_error: func => {
+    skipInvisibleError: func => {
         try {
             return func();
         } catch (e) {
