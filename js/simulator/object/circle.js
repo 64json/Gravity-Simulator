@@ -86,7 +86,7 @@ class Circle {
             }
 
             this.setup_controllers(posRange, m, v, vRange);
-            this.controlBox = new ControlBox(this.tag, this.getControllers(), x, y);
+            this.controlBox = new ControlBox(this, this.tag, this.getControllers(), x, y);
             this.engine.controlBoxes.push(this.controlBox);
         }
     }
@@ -107,6 +107,14 @@ class Circle {
             this.vRhoController,
             this.vPhiController
         ];
+    }
+
+    destroy() {
+        const i = this.engine.objs.indexOf(this);
+        this.engine.objs.splice(i, 1);
+        if (this.controlBox && this.controlBox.isOpen()) {
+            this.controlBox.close();
+        }
     }
 
     static getRadiusFromMass(m) {

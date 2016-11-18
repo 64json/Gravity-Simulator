@@ -23,6 +23,7 @@ class Engine2D {
         this.camera = new Camera2D(config, this);
         this.fpsLastTime = now();
         this.fpsCount = 0;
+        this.lastObjNo = 0;
     }
 
     toggleAnimating() {
@@ -130,7 +131,7 @@ class Engine2D {
         const m = Circle.getMassFromRadius(random(Circle.getRadiusFromMass(this.config.MASS_MIN), maxR));
         const v = polar2cartesian(random(this.config.VELOCITY_MAX / 2), random(-180, 180));
         const color = randColor();
-        const tag = `circle${this.objs.length}`;
+        const tag = `circle${++this.lastObjNo}`;
         const obj = new Circle(this.config, m, pos, v, color, tag, this);
         obj.showControlBox(x, y);
         this.objs.push(obj);

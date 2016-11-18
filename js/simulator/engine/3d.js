@@ -29,7 +29,7 @@ class Engine3D extends Engine2D {
         const m = Sphere.getMassFromRadius(random(Sphere.getRadiusFromMass(this.config.MASS_MIN), maxR));
         const v = spherical2cartesian(random(this.config.VELOCITY_MAX / 2), random(-180, 180), random(-180, 180));
         const color = randColor();
-        const tag = `sphere${this.objs.length}`;
+        const tag = `sphere${++this.lastObjNo}`;
         const obj = new Sphere(this.config, m, pos, v, color, tag, this);
         obj.showControlBox(x, y);
         this.objs.push(obj);

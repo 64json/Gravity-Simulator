@@ -1,5 +1,5 @@
 class ControlBox {
-    constructor(title, controllers, x, y) {
+    constructor(object, title, controllers, x, y) {
         const $templateControlBox = $('.control-box.template');
         const $controlBox = $templateControlBox.clone();
         $controlBox.removeClass('template');
@@ -10,6 +10,9 @@ class ControlBox {
         }
         $controlBox.find('.close').click(() => {
             $controlBox.remove();
+        });
+        $controlBox.find('.remove').click(() => {
+            object.destroy();
         });
         $controlBox.insertBefore($templateControlBox);
         $controlBox.css('left', x + 'px');
