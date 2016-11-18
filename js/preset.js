@@ -14,7 +14,8 @@ function EMPTY_2D(c) {
         MASS_MIN: 1,
         MASS_MAX: 4e4,
         VELOCITY_MAX: 10,
-        DIRECTION_LENGTH: 50
+        DIRECTION_LENGTH: 50,
+        CAMERA_DISTANCE: 100
     });
 }
 
@@ -39,4 +40,4 @@ function TEST(c) {
     });
 }
 
-module.exports = EMPTY_2D;
+module.exports = EMPTY_3D;

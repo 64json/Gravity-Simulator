@@ -43,7 +43,7 @@ class Camera3D extends Camera2D {
     actual_point(x, y) {
         const Rx_ = get_rotation_x_matrix(deg2rad(this.theta), -1);
         const Ry_ = get_rotation_y_matrix(deg2rad(this.phi), -1);
-        const c = add(sub([x, y], this.center), [this.x, this.y]).concat(0);
+        const c = add(sub([x, y], this.center), [this.x, this.y]).concat(this.z - this.config.CAMERA_DISTANCE);
         return rotate(rotate(c, Ry_), Rx_);
     }
 }

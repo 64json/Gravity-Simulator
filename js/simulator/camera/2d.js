@@ -8,7 +8,7 @@ class Camera2D {
         this.config = config;
         this.x = 0;
         this.y = 0;
-        this.z = 100;
+        this.z = config.CAMERA_DISTANCE;
         this.phi = 0;
         this.engine = engine;
         this.last_time = 0;
@@ -77,7 +77,7 @@ class Camera2D {
         if (distance <= 0) {
             throw new InvisibleError();
         }
-        return 100 / distance;
+        return this.config.CAMERA_DISTANCE / distance;
     }
 
     adjust_coords(c) {
