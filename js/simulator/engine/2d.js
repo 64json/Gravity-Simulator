@@ -64,12 +64,13 @@ class Engine2D {
 
     draw_object(c, color = null) {
         try {
+            color = color || c.color;
             if (c instanceof Circle) {
                 c = this.object_coords(c);
             }
             this.ctx.beginPath();
             this.ctx.arc(c[0], c[1], c[2], 0, 2 * Math.PI, false);
-            this.ctx.fillStyle = color || c.color;
+            this.ctx.fillStyle = color;
             this.ctx.fill();
         } catch (e) {
             if (!(e instanceof InvisibleError)) {

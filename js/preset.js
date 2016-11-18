@@ -28,4 +28,4 @@ function EMPTY_3D(c) {
     });
 }
 
-module.exports = EMPTY_3D;
+module.exports = EMPTY_2D;
