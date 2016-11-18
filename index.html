@@ -20,13 +20,28 @@
 
         .template {
             display: none;
-            padding: 16px;
             background: grey;
         }
 
         .control-box {
             position: absolute;
+            background: rgba(150, 150, 150, .8);
             top: 0;
+            left: 0;
+        }
+
+        .title-bar {
+            display: block;
+            background: rgb(100, 100, 100);
+            padding: 8px;
+        }
+
+        .close {
+            float: right;
+        }
+
+        .input-container {
+            padding: 16px;
         }
 
         canvas {
@@ -39,7 +54,10 @@
 <body>
 <canvas></canvas>
 <div class="control-box template">
-    <span class="title"></span>
+    <div class="title-bar">
+        <span class="title"></span>
+        <button class="close">X</button>
+    </div>
     <div class="input-container">
         <div class="input-wrapper template">
             <span class="name"></span>
@@ -47,7 +65,6 @@
             <span class="value"></span>
         </div>
     </div>
-    <button class="close">Close</button>
 </div>
 <script src="public/gravity_simulator.js"></script>
 </body>

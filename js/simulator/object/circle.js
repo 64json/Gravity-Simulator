@@ -86,7 +86,7 @@ class Circle {
             }
 
             this.setup_controllers(pos_range, m, v, v_range);
-            this.controlbox = new ControlBox(this.tag, this.get_controllers());
+            this.controlbox = new ControlBox(this.tag, this.get_controllers(), this.engine.controlboxes.length);
             this.engine.controlboxes.push(this.controlbox);
         }
     }

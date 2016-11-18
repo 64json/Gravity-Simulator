@@ -17,7 +17,6 @@ class Engine3D extends Engine2D {
         let factor = 50;
         let c = this.camera.rotated_coords(obj.pos);
         const minFactor = (this.camera.z - c[2] - 1) / obj.v[2];
-        console.log(minFactor);
         if (minFactor > 0) factor = min(factor, minFactor);
         const [cx, cy] = this.camera.adjust_coords(obj.pos);
         const [dx, dy] = this.camera.adjust_coords(add(obj.pos, mul(obj.v, factor)));
