@@ -11,7 +11,7 @@ class Circle {
      * https://en.wikipedia.org/wiki/Polar_coordinate_system
      */
 
-    constructor(config, m, pos, v, color, tag, engine, controlbox) {
+    constructor(config, m, pos, v, color, tag, engine) {
         this.config = config;
         this.m = m;
         this.pos = pos;
@@ -22,9 +22,6 @@ class Circle {
         this.engine = engine;
 
         this.controlbox = null;
-        if (controlbox) {
-            this.show_controlbox()
-        }
     }
 
     get_r() {
@@ -66,11 +63,13 @@ class Circle {
         this.v = polar2cartesian(rho, phi);
     }
 
-    show_controlbox() {
-        try {
+    show_controlbox(x, y) {
+        if (this.controlbox && this.controlbox.is_opened()) {
             const $controlBox = this.controlbox.$controlBox;
+            $controlBox.css('left', x + 'px');
+            $controlBox.css('top', y + 'px');
             $controlBox.nextUntil('.control-box.template').insertBefore($controlBox);
-        } catch (e) {
+        } else {
             const margin = 1.5;
 
             var pos_range = max(max(this.config.W, this.config.H) / 2, max.apply(null, this.pos.map(Math.abs)) * margin);
@@ -87,7 +86,7 @@ class Circle {
             }
 
             this.setup_controllers(pos_range, m, v, v_range);
-            this.controlbox = new ControlBox(this.tag, this.get_controllers(), this.engine.controlboxes.length);
+            this.controlbox = new ControlBox(this.tag, this.get_controllers(), x, y);
             this.engine.controlboxes.push(this.controlbox);
         }
     }

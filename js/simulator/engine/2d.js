@@ -28,7 +28,7 @@ class Engine2D {
 
     destroy_controlboxes() {
         for (const controlbox of this.controlboxes) {
-            controlbox.destroy();
+            controlbox.close();
         }
         this.controlboxes = []
     }
@@ -141,7 +141,8 @@ class Engine2D {
             color = rand_color();
         }
         const tag = `circle${this.objs.length}`;
-        const obj = new Circle(this.config, m, pos, v, color, tag, this, controlbox);
+        const obj = new Circle(this.config, m, pos, v, color, tag, this);
+        if (controlbox) obj.show_controlbox(x, y);
         this.objs.push(obj);
     }
 

@@ -36,6 +36,7 @@ class Engine3D extends Engine2D {
         }
         const tag = `sphere${this.objs.length}`;
         const obj = new Sphere(this.config, m, pos, v, color, tag, this, controlbox);
+        if (controlbox) obj.show_controlbox(x, y);
         this.objs.push(obj);
     }
 

@@ -30,7 +30,7 @@ function on_click(event, engine) {
         for (const obj of engine.objs) {
             const [cx, cy, r] = engine.object_coords(obj);
             if (get_distance(cx, cy, x, y) < r) {
-                obj.show_controlbox();
+                obj.show_controlbox(x, y);
                 return;
             }
         }
