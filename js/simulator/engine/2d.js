@@ -52,7 +52,7 @@ class Engine2D {
 
     direction_coords(obj) {
         const [cx, cy] = this.camera.adjust_coords(obj.pos);
-        const [dx, dy] = this.camera.adjust_coords(add(obj.pos, mul(obj.v, 50)), true);
+        const [dx, dy] = this.camera.adjust_coords(add(obj.pos, mul(obj.v, 50)));
         return [cx, cy, dx, dy];
     }
 

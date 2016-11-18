@@ -72,16 +72,15 @@ class Camera2D {
     refresh() {
     }
 
-    get_zoom(z = 0, allow_invisible = false) {
+    get_zoom(z = 0) {
         var distance = this.z - z;
         if (distance <= 0) {
-            if (!allow_invisible) throw new InvisibleError();
-            distance = Infinity;
+            throw new InvisibleError();
         }
         return 100 / distance;
     }
 
-    adjust_coords(coords, allow_invisible = false) {
+    adjust_coords(coords) {
         const R = get_rotation_matrix(deg2rad(this.phi));
         const zoom = this.get_zoom();
         return add(this.center, mul(sub(rotate(coords, R), [this.x, this.y]), zoom));

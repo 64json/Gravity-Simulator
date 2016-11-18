@@ -25,9 +25,9 @@ class Camera3D extends Camera2D {
         return rotate(rotate(coords, Rx), Ry);
     }
 
-    adjust_coords(coords, allow_invisible = false) {
+    adjust_coords(coords) {
         const c = this.rotated_coords(coords);
-        const zoom = this.get_zoom(c.pop(), allow_invisible);
+        const zoom = this.get_zoom(c.pop());
         return add(this.center, mul(sub(c, [this.x, this.y]), zoom));
     }
 
