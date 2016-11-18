@@ -3,7 +3,6 @@ const {extend} = $;
 
 function EMPTY_2D(c) {
     return extend(true, c, {
-        TITLE: 'Gravity Simulator',
         BACKGROUND: 'white',
         DIMENSION: 2,
         MAX_PATHS: 1000,
@@ -18,6 +17,7 @@ function EMPTY_2D(c) {
         CAMERA_DISTANCE: 100
     });
 }
+EMPTY_2D.prototype.title = '2D Gravity Simulator';
 
 
 function EMPTY_3D(c) {
@@ -29,8 +29,9 @@ function EMPTY_3D(c) {
         VELOCITY_MAX: 10
     });
 }
+EMPTY_3D.prototype.title = '3D Gravity Simulator';
 
-function TEST(c) {
+function DEBUG(c) {
     return extend(true, EMPTY_3D(c), {
         init: (engine) => {
             engine.createObject('ball1', [-150, 0, 0], 1000000, [0, 0, 0], 'green');
@@ -39,5 +40,6 @@ function TEST(c) {
         }
     });
 }
+DEBUG.prototype.title = 'DEBUG';
 
-module.exports = EMPTY_3D;
+module.exports = [EMPTY_2D, EMPTY_3D, DEBUG];

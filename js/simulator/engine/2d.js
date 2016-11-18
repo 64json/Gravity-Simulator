@@ -37,7 +37,13 @@ class Engine2D {
         this.controlBoxes = []
     }
 
+    destroy() {
+        this.ctx = null;
+        this.destroyControlBoxes();
+    }
+
     animate() {
+        if (!this.ctx) return;
         this.printFps();
         if (this.animating) {
             this.calculateAll();

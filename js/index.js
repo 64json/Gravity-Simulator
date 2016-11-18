@@ -1,8 +1,26 @@
-const preset = require('./preset');
+const presets = require('./preset');
 const Simulator = require('./simulator');
 
-const simulator = new Simulator(preset);
-simulator.animate();
+const simulator = new Simulator();
+let selected = 1;
+simulator.init(presets[selected]);
+
+const $select = $('select');
+for (let i = 0; i < presets.length; i++) {
+    const preset = presets[i];
+    $select.append(`<option value="${i}"${i == selected ? ' selected' : ''}>${preset.prototype.title}</option>`);
+}
+$select.change(() => {
+    selected = parseInt($select.find(':selected').val());
+    simulator.init(presets[selected]);
+});
+$select.focus(() => {
+    $select.blur();
+});
+$('#reset').click(() => {
+    simulator.init(presets[selected]);
+});
+
 
 let $moving = null;
 let px, py;
@@ -28,12 +46,3 @@ $('body').mousemove(function (e) {
 $('body').mouseup(function (e) {
     $moving = null;
 });
-
-const {deg2rad, getXRotationMatrix, getYRotationMatrix, rotate} = require('./simulator/util');
-const angleX = deg2rad(30);
-const angleY = deg2rad(50);
-const Rx = getXRotationMatrix(angleX);
-const Rx_ = getXRotationMatrix(angleX, -1);
-const Ry = getYRotationMatrix(angleY);
-const Ry_ = getYRotationMatrix(angleY, -1);
-console.log(rotate(rotate(rotate(rotate([-5, 8, 3], Rx), Ry), Ry_), Rx_));

@@ -44,6 +44,7 @@ function onKeyDown(event, engine) {
     const {keyCode} = event;
     if (keyCode == 32) { // space bar
         engine.destroyControlBoxes();
+        console.log('a');
         engine.toggleAnimating();
     } else if (keyCode in keymap && keymap[keyCode] in engine.camera) {
         engine.camera[keymap[keyCode]](keyCode);
@@ -51,17 +52,13 @@ function onKeyDown(event, engine) {
 }
 
 class Simulator {
-    constructor(preset) {
-        config = preset({});
-        const $canvas = $('canvas');
-        const ctx = $canvas[0].getContext('2d');
-        onResize(this.engine, $canvas);
-        this.engine = new (config.DIMENSION == 2 ? Engine2D : Engine3D)(config, ctx);
-        if ('init' in config) config.init(this.engine);
+    constructor() {
+        this.$canvas = $('canvas');
+        this.ctx = this.$canvas[0].getContext('2d');
         $(window).resize(e => {
-            onResize(this.engine, $canvas);
+            onResize(this.engine, this.$canvas);
         });
-        $canvas.click(e => {
+        this.$canvas.click(e => {
             onClick(e, this.engine);
         });
         $('body').keydown(e => {
@@ -69,7 +66,13 @@ class Simulator {
         });
     }
 
-    animate() {
+    init(preset) {
+        if (this.engine) this.engine.destroy();
+        config = preset({});
+        document.title = config.TITLE = preset.prototype.title;
+        onResize(this.engine, this.$canvas);
+        this.engine = new (config.DIMENSION == 2 ? Engine2D : Engine3D)(config, this.ctx);
+        if ('init' in config) config.init(this.engine);
         this.engine.animate();
     }
 }
