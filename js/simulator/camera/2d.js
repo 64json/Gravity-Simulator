@@ -75,7 +75,7 @@ class Camera2D {
     get_zoom(z = 0, allow_invisible = false) {
         var distance = this.z - z;
         if (distance <= 0) {
-            if (!allow_invisible) throw InvisibleError;
+            if (!allow_invisible) throw new InvisibleError();
             distance = Infinity;
         }
         return 100 / distance;
