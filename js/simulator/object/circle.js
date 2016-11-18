@@ -61,8 +61,8 @@ class Circle {
     }
 
     control_v(e) {
-        const phi = deg2rad(this.v_phi_controller.get());
         const rho = this.v_rho_controller.get();
+        const phi = deg2rad(this.v_phi_controller.get());
         this.v = polar2cartesian(rho, phi);
     }
 

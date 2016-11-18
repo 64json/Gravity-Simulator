@@ -19,7 +19,7 @@ const Util = {
     cartesian2polar: (x, y) => {
         return [
             mag([x, y]),
-            Math.atan2(x, y)
+            Math.atan2(y, x)
         ];
     },
 
@@ -35,7 +35,7 @@ const Util = {
         const rho = mag([x, y, z]);
         return [
             rho,
-            Math.atan2(x, y),
+            Math.atan2(y, x),
             rho != 0 ? Math.acos(z / rho) : 0
         ];
     },

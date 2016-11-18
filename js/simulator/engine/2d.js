@@ -78,7 +78,7 @@ class Engine2D {
 
     draw_direction(obj) {
         try {
-            const c = this.object_coords(obj);
+            const c = this.direction_coords(obj);
             this.ctx.beginPath();
             this.ctx.moveTo(c[0], c[1]);
             this.ctx.lineTo(c[2], c[3]);
