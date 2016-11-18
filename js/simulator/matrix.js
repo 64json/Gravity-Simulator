@@ -9,7 +9,7 @@ function iter(a, func) {
 
 module.exports = {
     zeros: N => {
-        Array.apply(null, Array(N)).map(Number.prototype.valueOf,0);
+        return new Array(N).fill(0);
     },
 
     mag: a => {

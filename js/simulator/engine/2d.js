@@ -109,7 +109,7 @@ class Engine2D {
     }
 
     create_path(obj) {
-        if (vector_magnitude(obj.pos.subtract(obj.prev_pos)) > 5) {
+        if (mag(sub(obj.pos, obj.prev_pos)) > 5) {
             this.paths.push(new Path(obj));
             obj.prev_pos = obj.pos.slice();
             if (this.paths.length > this.config.MAX_PATHS) {
@@ -166,8 +166,8 @@ class Engine2D {
                     const pos_temp = [zeros(dimension), rotate(collision, R)];
                     pos_temp[0][0] += v_final[0][0];
                     pos_temp[1][0] += v_final[1][0];
-                    o1.pos = o1.pos.add(rotate(pos_temp[0], R_));
-                    o2.pos = o1.pos.add(rotate(pos_temp[1], R_));
+                    o1.pos = add(o1.pos, rotate(pos_temp[0], R_));
+                    o2.pos = add(o1.pos, rotate(pos_temp[1], R_));
                 }
             }
         }

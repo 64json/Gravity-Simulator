@@ -18,7 +18,7 @@ const Util = {
 
     cartesian2polar: (x, y) => {
         return [
-            Math.sqrt(Util.square(x) + Util.square(y)),
+            mag([x, y]),
             Math.atan2(x, y)
         ];
     },
@@ -32,7 +32,7 @@ const Util = {
     },
 
     cartesian2spherical: (x, y, z) => {
-        const rho = Math.sqrt(Util.square(x) + Util.square(y) + Util.square(z));
+        const rho = mag([x, y, z]);
         return [
             rho,
             Math.atan2(x, y),
@@ -59,7 +59,7 @@ const Util = {
     },
 
     rotate: (vector, matrix) => {
-        return dot(vector, matrix);
+        return dot([vector], matrix)[0];
     },
 
     now: () => {
