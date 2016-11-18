@@ -61,9 +61,9 @@ class Engine2D {
     }
 
     pathCoords(obj) {
-        const {coords: c1, z1} = this.camera.adjustCoords(obj.prevPos);
-        const {coords: c2, z2} = this.camera.adjustCoords(obj.pos);
-        return c1.concat(c2, max(z1, z2));
+        const {coords: c1} = this.camera.adjustCoords(obj.prevPos);
+        const {coords: c2, z} = this.camera.adjustCoords(obj.pos);
+        return c1.concat(c2).concat(z);
     }
 
     drawObject(c, color = null) {
