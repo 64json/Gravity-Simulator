@@ -4,6 +4,7 @@ class Controller {
         $inputWrapper.removeClass('template');
         $inputWrapper.find('.name').text(name);
         const $input = this.$input = $inputWrapper.find('input');
+        $input.attr('type', object.config.INPUT_TYPE);
         $input.attr('min', min);
         $input.attr('max', max);
         $input.attr('value', value);

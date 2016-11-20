@@ -14,7 +14,8 @@ function EMPTY_2D(c) {
         MASS_MAX: 4e4,
         VELOCITY_MAX: 10,
         DIRECTION_LENGTH: 50,
-        CAMERA_DISTANCE: 100
+        CAMERA_DISTANCE: 100,
+        INPUT_TYPE: 'range'
     });
 }
 EMPTY_2D.prototype.title = '2D Gravity Simulator';
@@ -31,6 +32,20 @@ function EMPTY_3D(c) {
 }
 EMPTY_3D.prototype.title = '3D Gravity Simulator';
 
+function WOO_2D(c) {
+    return extend(true, EMPTY_2D(c), {
+        INPUT_TYPE: 'number'
+    });
+}
+WOO_2D.prototype.title = '2D WOO';
+
+function WOO_3D(c) {
+    return extend(true, EMPTY_3D(c), {
+        INPUT_TYPE: 'number'
+    });
+}
+WOO_3D.prototype.title = '3D WOO';
+
 function DEBUG(c) {
     return extend(true, EMPTY_3D(c), {
         init: (engine) => {
@@ -42,4 +57,4 @@ function DEBUG(c) {
 }
 DEBUG.prototype.title = 'DEBUG';
 
-module.exports = [EMPTY_2D, EMPTY_3D, DEBUG];
+module.exports = [EMPTY_2D, EMPTY_3D, WOO_2D, WOO_3D, DEBUG];
