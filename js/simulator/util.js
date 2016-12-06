@@ -1,4 +1,3 @@
-const InvisibleError = require('./error/invisible');
 const {mag, dot} = require('./matrix');
 
 const Util = {
@@ -76,7 +75,7 @@ const Util = {
     },
 
     randColor: () => {
-        return '#' + Math.floor(0x1000000 + Math.random() * 0x1000000).toString(16).substring(1);
+        return Math.random() * 0xffffff;
     },
 
     getRotationMatrix: (x, dir = 1) => {
@@ -117,18 +116,6 @@ const Util = {
             [0, 0, 1]
         ];
     },
-
-    skipInvisibleError: func => {
-        try {
-            return func();
-        } catch (e) {
-            if (!(e instanceof InvisibleError)) {
-                console.error(e);
-                throw new Error();
-            }
-        }
-        return null;
-    }
 };
 
 module.exports = Util;

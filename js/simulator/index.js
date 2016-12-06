@@ -1,6 +1,6 @@
 const Engine2D = require('./engine/2d');
 const Engine3D = require('./engine/3d');
-const {getDistance, skipInvisibleError} = require('./util');
+const {getDistance} = require('./util');
 
 
 let config = null;
@@ -11,58 +11,68 @@ const keymap = {
     39: 'right',
     90: 'zoomIn', // z
     88: 'zoomOut', // x
-    87: 'rotateUp', // w
-    83: 'rotateDown', // s
-    65: 'rotateLeft', // a
-    68: 'rotateRight' // d
 };
+const $rendererWrapper = $('.renderer-wrapper');
 
-function onResize(engine, $canvas) {
-    config.W = $canvas[0].width = $canvas.width();
-    config.H = $canvas[0].height = $canvas.height();
-    if (engine) engine.camera.resize();
+function onResize(e, engine) {
+    config.W = $rendererWrapper.width();
+    config.H = $rendererWrapper.height();
+    if (engine) engine.resize();
 }
 
-function onClick(event, engine) {
-    const x = event.pageX;
-    const y = event.pageY;
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+function onClick(e, engine) {
+    const x = e.pageX;
+    const y = e.pageY;
     if (!engine.animating) {
+        mouse.x = (x / config.W) * 2 - 1;
+        mouse.y = -(y / config.H) * 2 + 1;
+        console.log(engine.camera);
+        raycaster.setFromCamera(mouse, engine.camera);
         for (const obj of engine.objs) {
-            if (skipInvisibleError(() => {
-                    const [cx, cy, r] = engine.objectCoords(obj);
-                    if (getDistance(cx, cy, x, y) < r) {
-                        obj.showControlBox(x, y);
-                        return true;
-                    }
-                })) return;
+            var intersects = raycaster.intersectObject(obj.object);
+            console.log(intersects);
+            if (intersects.length > 0) {
+                obj.showControlBox(x, y);
+                return true;
+            }
         }
         engine.userCreateObject(x, y);
     }
 }
 
-function onKeyDown(event, engine) {
-    const {keyCode} = event;
+function onKeyDown(e, engine) {
+    const {keyCode} = e;
     if (keyCode == 32) { // space bar
         engine.destroyControlBoxes();
-        console.log('a');
         engine.toggleAnimating();
-    } else if (keyCode in keymap && keymap[keyCode] in engine.camera) {
-        engine.camera[keymap[keyCode]](keyCode);
+    } else if (keyCode in keymap && keymap[keyCode] in engine) {
+        engine[keymap[keyCode]](keyCode);
     }
 }
 
 class Simulator {
     constructor() {
-        this.$canvas = $('canvas');
-        this.ctx = this.$canvas[0].getContext('2d');
+        this.renderer = new THREE.WebGLRenderer();
+        $rendererWrapper.append(this.renderer.domElement);
         $(window).resize(e => {
-            onResize(this.engine, this.$canvas);
+            onResize(e, this.engine);
         });
-        this.$canvas.click(e => {
+        $(this.renderer.domElement).click(e => {
             onClick(e, this.engine);
         });
         $('body').keydown(e => {
             onKeyDown(e, this.engine);
+        });
+        $(document).mousedown(e => {
+            this.engine.onMouseDown(e);
+        });
+        $(document).mousemove(e => {
+            this.engine.onMouseMove(e);
+        });
+        $(document).mouseup(e => {
+            this.engine.onMouseUp(e);
         });
     }
 
@@ -70,8 +80,8 @@ class Simulator {
         if (this.engine) this.engine.destroy();
         config = preset({});
         document.title = config.TITLE = preset.prototype.title;
-        onResize(this.engine, this.$canvas);
-        this.engine = new (config.DIMENSION == 2 ? Engine2D : Engine3D)(config, this.ctx);
+        this.engine = new (config.DIMENSION == 2 ? Engine2D : Engine3D)(config, this.renderer);
+        onResize(null, this.engine);
         if ('init' in config) config.init(this.engine);
         this.engine.animate();
     }

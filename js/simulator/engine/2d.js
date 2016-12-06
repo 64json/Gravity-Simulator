@@ -1,8 +1,7 @@
 const Circle = require('../object/circle');
-const Camera2D = require('../camera/2d');
-const {rotate, now, random, polar2cartesian, randColor, getRotationMatrix, cartesian2auto, skipInvisibleError} = require('../util');
-const {zeros, mag, add, sub, mul} = require('../matrix');
-const {min, max} = Math;
+const {rotate, now, random, polar2cartesian, randColor, getRotationMatrix, cartesian2auto} = require('../util');
+const {zeros, mag, add, sub} = require('../matrix');
+const {min, PI, atan2, pow} = Math;
 
 
 class Path {
@@ -13,17 +12,23 @@ class Path {
 }
 
 class Engine2D {
-    constructor(config, ctx) {
+    constructor(config, renderer) {
         this.config = config;
-        this.ctx = ctx;
         this.objs = [];
         this.animating = false;
         this.controlBoxes = [];
         this.paths = [];
-        this.camera = new Camera2D(config, this);
         this.fpsLastTime = now();
         this.fpsCount = 0;
         this.lastObjNo = 0;
+        this.renderer = renderer;
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.OrthographicCamera(-this.config.W / 2, this.config.W / 2, -this.config.H / 2, this.config.H / 2, 1, 1000);
+        this.camera.position.z = 100;
+
+        this.mouseDown = false;
+        this.mouseX = 0;
+        this.mouseY = 0;
     }
 
     toggleAnimating() {
@@ -39,77 +44,18 @@ class Engine2D {
     }
 
     destroy() {
-        this.ctx = null;
+        this.renderer = null;
         this.destroyControlBoxes();
     }
 
     animate() {
-        if (!this.ctx) return;
+        if (!this.renderer) return;
         this.printFps();
         if (this.animating) {
             this.calculateAll();
         }
         this.redrawAll();
-        setTimeout(() => {
-            this.animate();
-        }, 10);
-    }
-
-    objectCoords(obj) {
-        const r = this.camera.adjustRadius(obj.pos, obj.getRadius());
-        const {coords, z} = this.camera.adjustCoords(obj.pos);
-        return coords.concat(r).concat(z);
-    }
-
-    directionCoords(obj, factor = this.config.DIRECTION_LENGTH) {
-        const {coords: c1} = this.camera.adjustCoords(obj.pos);
-        const {coords: c2, z} = this.camera.adjustCoords(add(obj.pos, mul(obj.v, factor)));
-        return c1.concat(c2).concat(z);
-    }
-
-    pathCoords(obj) {
-        const {coords: c1} = this.camera.adjustCoords(obj.prevPos);
-        const {coords: c2, z} = this.camera.adjustCoords(obj.pos);
-        return c1.concat(c2).concat(z);
-    }
-
-    drawObject(c, color = null) {
-        skipInvisibleError(() => {
-            color = color || c.color;
-            if (c instanceof Circle) {
-                c = this.objectCoords(c);
-            }
-            this.ctx.beginPath();
-            this.ctx.arc(c[0], c[1], c[2], 0, 2 * Math.PI, false);
-            this.ctx.fillStyle = color;
-            this.ctx.fill();
-        });
-    }
-
-    drawDirection(c) {
-        skipInvisibleError(() => {
-            if (c instanceof Circle) {
-                c = this.directionCoords(c);
-            }
-            this.ctx.beginPath();
-            this.ctx.moveTo(c[0], c[1]);
-            this.ctx.lineTo(c[2], c[3]);
-            this.ctx.strokeStyle = '#000000';
-            this.ctx.stroke();
-        });
-    }
-
-    drawPath(c) {
-        skipInvisibleError(() => {
-            if (c instanceof Path) {
-                c = this.pathCoords(c);
-            }
-            this.ctx.beginPath();
-            this.ctx.moveTo(c[0], c[1]);
-            this.ctx.lineTo(c[2], c[3]);
-            this.ctx.strokeStyle = '#dddddd';
-            this.ctx.stroke();
-        });
+        requestAnimationFrame(this.animate.bind(this));
     }
 
     createPath(obj) {
@@ -123,7 +69,7 @@ class Engine2D {
     }
 
     userCreateObject(x, y) {
-        const pos = this.camera.actualPoint(x, y);
+        const pos = [(x - this.config.W / 2) / this.camera.zoom, (y - this.config.H / 2) / this.camera.zoom];
         let maxR = Circle.getRadiusFromMass(this.config.MASS_MAX);
         for (const obj of this.objs) {
             maxR = min(maxR, (mag(sub(obj.pos, pos)) - obj.getRadius()) / 1.5)
@@ -194,14 +140,10 @@ class Engine2D {
     }
 
     redrawAll() {
-        this.ctx.clearRect(0, 0, this.config.W, this.config.H);
         for (const obj of this.objs) {
-            this.drawObject(obj);
-            this.drawDirection(obj);
+            obj.update();
         }
-        for (const path of this.paths) {
-            this.drawPath(path);
-        }
+        this.renderer.render(this.scene, this.camera);
     }
 
     printFps() {
@@ -213,6 +155,82 @@ class Engine2D {
             this.fpsLastTime = currentTime;
             this.fpsCount = 0;
         }
+    }
+
+    resize() {
+        this.camera.left = -this.config.W / 2;
+        this.camera.right = this.config.W / 2;
+        this.camera.top = -this.config.H / 2;
+        this.camera.bottom = this.config.H / 2;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(this.config.W, this.config.H);
+    }
+
+    onMouseMove(e) {
+        if (!this.mouseDown) {
+            return;
+        }
+
+        var delta = atan2(e.clientY - this.config.H / 2, e.clientX - this.config.W / 2) - atan2(this.mouseY - this.config.H / 2, this.mouseX - this.config.W / 2);
+        if (delta < -PI) delta += 2 * PI;
+        if (delta > +PI) delta -= 2 * PI;
+        this.mouseX = e.pageX;
+        this.mouseY = e.pageY;
+        this.camera.rotation.z += delta;
+        this.camera.updateProjectionMatrix();
+    }
+
+    onMouseDown(e) {
+        this.mouseDown = true;
+        this.mouseX = e.pageX;
+        this.mouseY = e.pageY;
+    }
+
+    onMouseUp(e) {
+        this.mouseDown = false;
+    }
+
+    getCoordStep(key) {
+        const currentTime = now();
+        if (key == this.lastKey && currentTime - this.lastTime < 1) {
+            this.combo += 1;
+        } else {
+            this.combo = 0;
+        }
+        this.lastTime = currentTime;
+        this.lastKey = key;
+        return this.config.CAMERA_COORD_STEP * pow(this.config.CAMERA_ACCELERATION, this.combo);
+    }
+
+    up(key) {
+        this.camera.translateY(-this.getCoordStep(key));
+        this.camera.updateProjectionMatrix();
+    }
+
+    down(key) {
+        this.camera.translateY(+this.getCoordStep(key));
+        this.camera.updateProjectionMatrix();
+    }
+
+    left(key) {
+        this.camera.translateX(-this.getCoordStep(key));
+        this.camera.updateProjectionMatrix();
+    }
+
+    right(key) {
+        this.camera.translateX(+this.getCoordStep(key));
+        this.camera.updateProjectionMatrix();
+    }
+
+    zoomIn(key) {
+        this.camera.zoom += this.getCoordStep(key) / 100;
+        this.camera.updateProjectionMatrix();
+    }
+
+    zoomOut(key) {
+        this.camera.zoom -= this.getCoordStep(key) / 100;
+        if (this.camera.zoom < 0.01)this.camera.zoom = 0.01;
+        this.camera.updateProjectionMatrix();
     }
 }
 

@@ -14,7 +14,10 @@ function EMPTY_2D(c) {
         MASS_MAX: 4e4,
         VELOCITY_MAX: 10,
         DIRECTION_LENGTH: 50,
-        CAMERA_DISTANCE: 100,
+        CAMERA_X: 0,
+        CAMERA_Y: 0,
+        CAMERA_Z: 200,
+        FOCAL_LENGTH: 100,
         INPUT_TYPE: 'range'
     });
 }

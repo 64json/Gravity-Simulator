@@ -64,7 +64,6 @@ gulp.task('build-js', () => {
         .pipe(sourcemaps.write(outputPaths.sourceMaps))
         .pipe(gulp.dest(outputPaths.js))
         .pipe(connect.reload());
-
 });
 
 // Server

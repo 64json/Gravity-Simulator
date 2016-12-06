@@ -20,8 +20,18 @@ class Circle {
         this.color = color;
         this.tag = tag;
         this.engine = engine;
-
+        this.object = this.createObject();
         this.controlBox = null;
+    }
+
+    createObject() {
+        if (this.object) this.engine.scene.remove(this.object);
+        const geometry = new THREE.SphereGeometry(this.getRadius(), 32, 32);
+        const material = new THREE.MeshBasicMaterial({color: this.color});
+        const object = new THREE.Mesh(geometry, material);
+        object.matrixAutoUpdate = false;
+        this.engine.scene.add(object);
+        return object;
     }
 
     getRadius() {
@@ -46,9 +56,16 @@ class Circle {
         this.pos = add(this.pos, this.v);
     }
 
+    update() {
+        this.object.position.x = this.pos[0];
+        this.object.position.y = this.pos[1];
+        this.object.updateMatrix();
+    }
+
     controlM(e) {
         const m = this.mController.get();
         this.m = m;
+        this.object = this.createObject();
     }
 
     controlPos(e) {
