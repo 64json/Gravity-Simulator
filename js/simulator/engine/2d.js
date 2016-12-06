@@ -3,21 +3,12 @@ const {rotate, now, random, polar2cartesian, randColor, getRotationMatrix, carte
 const {zeros, mag, add, sub} = require('../matrix');
 const {min, PI, atan2, pow} = Math;
 
-
-class Path {
-    constructor(obj) {
-        this.prevPos = obj.prevPos.slice();
-        this.pos = obj.pos.slice();
-    }
-}
-
 class Engine2D {
     constructor(config, renderer) {
         this.config = config;
         this.objs = [];
         this.animating = false;
         this.controlBoxes = [];
-        this.paths = [];
         this.fpsLastTime = now();
         this.fpsCount = 0;
         this.lastObjNo = 0;
@@ -58,33 +49,24 @@ class Engine2D {
         requestAnimationFrame(this.animate.bind(this));
     }
 
-    createPath(obj) {
-        if (mag(sub(obj.pos, obj.prevPos)) > 5) {
-            this.paths.push(new Path(obj));
-            obj.prevPos = obj.pos.slice();
-            if (this.paths.length > this.config.MAX_PATHS) {
-                this.paths = this.paths.slice(1);
-            }
-        }
-    }
-
     userCreateObject(x, y) {
         const pos = [(x - this.config.W / 2) / this.camera.zoom, (y - this.config.H / 2) / this.camera.zoom];
-        let maxR = Circle.getRadiusFromMass(this.config.MASS_MAX);
+        let maxR = this.config.RADIUS_MAX;
         for (const obj of this.objs) {
-            maxR = min(maxR, (mag(sub(obj.pos, pos)) - obj.getRadius()) / 1.5)
+            maxR = min(maxR, (mag(sub(obj.pos, pos)) - obj.r) / 1.5)
         }
-        const m = Circle.getMassFromRadius(random(Circle.getRadiusFromMass(this.config.MASS_MIN), maxR));
+        const m = random(this.config.MASS_MIN, this.config.MASS_MAX);
+        const r = random(this.config.RADIUS_MIN, maxR);
         const v = polar2cartesian(random(this.config.VELOCITY_MAX / 2), random(-180, 180));
         const color = randColor();
         const tag = `circle${++this.lastObjNo}`;
-        const obj = new Circle(this.config, m, pos, v, color, tag, this);
+        const obj = new Circle(this.config, m, r, pos, v, color, tag, this);
         obj.showControlBox(x, y);
         this.objs.push(obj);
     }
 
-    createObject(tag, pos, m, v, color) {
-        const obj = new Circle(this.config, m, pos, v, color, tag, this);
+    createObject(tag, pos, m, r, v, color) {
+        const obj = new Circle(this.config, m, r, pos, v, color, tag, this);
         this.objs.push(obj);
     }
 
@@ -106,7 +88,7 @@ class Engine2D {
                 const angles = cartesian2auto(collision);
                 const d = angles.shift();
 
-                if (d < o1.getRadius() + o2.getRadius()) {
+                if (d < o1.r + o2.r) {
                     const R = this.getRotationMatrix(angles);
                     const R_ = this.getRotationMatrix(angles, -1);
                     const i = this.getPivotAxis();
@@ -135,13 +117,12 @@ class Engine2D {
         this.collideElastically();
         for (const obj of this.objs) {
             obj.calculatePosition();
-            this.createPath(obj);
         }
     }
 
     redrawAll() {
         for (const obj of this.objs) {
-            obj.update();
+            obj.draw();
         }
         this.renderer.render(this.scene, this.camera);
     }

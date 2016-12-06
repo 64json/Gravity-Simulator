@@ -11,9 +11,10 @@ class Circle {
      * https://en.wikipedia.org/wiki/Polar_coordinate_system
      */
 
-    constructor(config, m, pos, v, color, tag, engine) {
+    constructor(config, m, r, pos, v, color, tag, engine) {
         this.config = config;
         this.m = m;
+        this.r = r;
         this.pos = pos;
         this.prevPos = pos.slice();
         this.v = v;
@@ -22,20 +23,21 @@ class Circle {
         this.engine = engine;
         this.object = this.createObject();
         this.controlBox = null;
+        this.path = null;
+        this.pathVertices = [];
+        this.pathMaterial = new THREE.LineBasicMaterial({
+            color: 0xffffff
+        });
     }
 
     createObject() {
         if (this.object) this.engine.scene.remove(this.object);
-        const geometry = new THREE.SphereGeometry(this.getRadius(), 32, 32);
+        const geometry = new THREE.SphereGeometry(this.r, 32, 32);
         const material = new THREE.MeshBasicMaterial({color: this.color});
         const object = new THREE.Mesh(geometry, material);
         object.matrixAutoUpdate = false;
         this.engine.scene.add(object);
         return object;
-    }
-
-    getRadius() {
-        return Circle.getRadiusFromMass(this.m)
     }
 
     calculateVelocity() {
@@ -54,17 +56,32 @@ class Circle {
 
     calculatePosition() {
         this.pos = add(this.pos, this.v);
+        if (mag(sub(this.pos, this.prevPos)) > 1) {
+            this.prevPos = this.pos.slice();
+            this.pathVertices.push(new THREE.Vector3(this.pos[0], this.pos[1], 0));
+        }
     }
 
-    update() {
+    draw() {
         this.object.position.x = this.pos[0];
         this.object.position.y = this.pos[1];
         this.object.updateMatrix();
+        if (this.path) this.engine.scene.remove(this.path);
+        const pathGeometry = new THREE.Geometry();
+        pathGeometry.vertices = this.pathVertices;
+        this.path = new THREE.Line(pathGeometry, this.pathMaterial);
+        this.engine.scene.add(this.path);
     }
 
     controlM(e) {
         const m = this.mController.get();
         this.m = m;
+        this.object = this.createObject();
+    }
+
+    controlR(e) {
+        const r = this.rController.get();
+        this.r = r;
         this.object = this.createObject();
     }
 
@@ -94,7 +111,6 @@ class Circle {
                 posRange = max(posRange, max.apply(null, obj.pos.map(Math.abs)) * margin);
             }
 
-            const m = this.m;
 
             const v = cartesian2auto(this.v);
             var vRange = max(this.config.VELOCITY_MAX, mag(this.v) * margin);
@@ -102,14 +118,15 @@ class Circle {
                 vRange = max(vRange, mag(obj.v) * margin);
             }
 
-            this.setup_controllers(posRange, m, v, vRange);
+            this.setup_controllers(posRange, this.m, this.r, v, vRange);
             this.controlBox = new ControlBox(this, this.tag, this.getControllers(), x, y);
             this.engine.controlBoxes.push(this.controlBox);
         }
     }
 
-    setup_controllers(posRange, m, v, vRange) {
+    setup_controllers(posRange, m, r, v, vRange) {
         this.mController = new Controller(this, "Mass m", this.config.MASS_MIN, this.config.MASS_MAX, m, this.controlM);
+        this.rController = new Controller(this, "Radius r", this.config.RADIUS_MIN, this.config.RADIUS_MAX, r, this.controlR);
         this.posXController = new Controller(this, "Position x", -posRange, posRange, this.pos[0], this.controlPos);
         this.posYController = new Controller(this, "Position y", -posRange, posRange, this.pos[1], this.controlPos);
         this.vRhoController = new Controller(this, "Velocity ρ", 0, vRange, v[0], this.controlV);
@@ -119,6 +136,7 @@ class Circle {
     getControllers() {
         return [
             this.mController,
+            this.rController,
             this.posXController,
             this.posYController,
             this.vRhoController,
@@ -127,19 +145,13 @@ class Circle {
     }
 
     destroy() {
+        if (this.object) this.engine.scene.remove(this.object);
+        if (this.path) this.engine.scene.remove(this.path);
         const i = this.engine.objs.indexOf(this);
         this.engine.objs.splice(i, 1);
         if (this.controlBox && this.controlBox.isOpen()) {
             this.controlBox.close();
         }
-    }
-
-    static getRadiusFromMass(m) {
-        return pow(m, 1 / 2)
-    }
-
-    static getMassFromRadius(r) {
-        return square(r)
     }
 
     toString() {

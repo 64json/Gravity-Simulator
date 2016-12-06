@@ -12,6 +12,8 @@ function EMPTY_2D(c) {
         G: 0.1,
         MASS_MIN: 1,
         MASS_MAX: 4e4,
+        RADIUS_MIN: 1,
+        RADIUS_MAX: 2e2,
         VELOCITY_MAX: 10,
         DIRECTION_LENGTH: 50,
         CAMERA_X: 0,
@@ -52,8 +54,8 @@ WOO_3D.prototype.title = '3D WOO';
 function DEBUG(c) {
     return extend(true, EMPTY_3D(c), {
         init: (engine) => {
-            engine.createObject('ball1', [-150, 0, 0], 1000000, [0, 0, 0], 'green');
-            engine.createObject('ball2', [50, 0, 0], 10000, [0, 0, 0], 'blue');
+            engine.createObject('ball1', [-150, 0, 0], 1000000, 100, [0, 0, 0], 'green');
+            engine.createObject('ball2', [50, 0, 0], 10000, 10, [0, 0, 0], 'blue');
             engine.toggleAnimating();
         }
     });

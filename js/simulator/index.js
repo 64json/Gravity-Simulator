@@ -28,11 +28,9 @@ function onClick(e, engine) {
     if (!engine.animating) {
         mouse.x = (x / config.W) * 2 - 1;
         mouse.y = -(y / config.H) * 2 + 1;
-        console.log(engine.camera);
         raycaster.setFromCamera(mouse, engine.camera);
         for (const obj of engine.objs) {
             var intersects = raycaster.intersectObject(obj.object);
-            console.log(intersects);
             if (intersects.length > 0) {
                 obj.showControlBox(x, y);
                 return true;
