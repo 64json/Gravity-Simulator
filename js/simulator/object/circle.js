@@ -83,10 +83,14 @@ class Circle {
 
         if (this.direction) this.engine.scene.remove(this.direction);
         const directionGeometry = new THREE.Geometry();
-        const nextPos = add(this.pos, mul(this.v, 20));
-        directionGeometry.vertices = [new THREE.Vector3(this.pos[0], this.pos[1], this.pos[2]), new THREE.Vector3(nextPos[0], nextPos[1], nextPos[2])];
-        this.direction = new THREE.Line(directionGeometry, this.directionMaterial);
-        this.engine.scene.add(this.direction);
+        if (mag(this.v) == 0) {
+            this.direction = null;
+        } else {
+            const nextPos = add(this.pos, mul(this.v, this.r / mag(this.v) + 20));
+            directionGeometry.vertices = [new THREE.Vector3(this.pos[0], this.pos[1], this.pos[2]), new THREE.Vector3(nextPos[0], nextPos[1], nextPos[2])];
+            this.direction = new THREE.Line(directionGeometry, this.directionMaterial);
+            this.engine.scene.add(this.direction);
+        }
     }
 
     controlM(e) {
