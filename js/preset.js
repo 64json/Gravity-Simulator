@@ -75,4 +75,11 @@ function COLLISION(c) {
 }
 COLLISION.prototype.title = 'Elastic Collision';
 
-module.exports = [EMPTY_2D, EMPTY_3D, MANUAL_2D, MANUAL_3D, ORBITING, COLLISION];
+function SOLAR_SYSTEM(c) {
+    return extend(true, MANUAL_3D(c), {
+        G: 0.002664182652406417112299465240641711229946524064171122994,
+    });
+}
+SOLAR_SYSTEM.prototype.title = 'Solar System';
+
+module.exports = [EMPTY_2D, EMPTY_3D, MANUAL_2D, MANUAL_3D, ORBITING, COLLISION, SOLAR_SYSTEM];
