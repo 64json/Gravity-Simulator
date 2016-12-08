@@ -77,7 +77,12 @@ COLLISION.prototype.title = 'Elastic Collision';
 
 function SOLAR_SYSTEM(c) {
     return extend(true, MANUAL_3D(c), {
-        G: 0.002664182652406417112299465240641711229946524064171122994,
+        G: 0.00266418,
+        init: (engine) => {
+            engine.createObject('Sun', [0, 0, 0], 1000000, 100, [0, 0, 0], 'map/solar_system/sun.jpg');
+            engine.createObject('Mercury', [200, 0, 0], 1000000, 100, [0, 0, 0], 'map/solar_system/mercury.png');
+            engine.toggleAnimating();
+        }
     });
 }
 SOLAR_SYSTEM.prototype.title = 'Solar System';

@@ -3,6 +3,7 @@ const Controller = require('../control/controller');
 const {rad2deg, deg2rad, polar2cartesian, cartesian2auto, square} = require('../util');
 const {zeros, mag, add, sub, mul, div} = require('../matrix');
 const {max} = Math;
+const textureLoader = new THREE.TextureLoader();
 
 
 class Circle {
@@ -11,14 +12,14 @@ class Circle {
      * https://en.wikipedia.org/wiki/Polar_coordinate_system
      */
 
-    constructor(config, m, r, pos, v, color, tag, engine) {
+    constructor(config, m, r, pos, v, texture, tag, engine) {
         this.config = config;
         this.m = m;
         this.r = r;
         this.pos = pos;
         this.prevPos = pos.slice();
         this.v = v;
-        this.color = color;
+        this.texture = texture;
         this.tag = tag;
         this.engine = engine;
         this.object = this.createObject();
@@ -41,7 +42,10 @@ class Circle {
     createObject() {
         if (this.object) this.engine.scene.remove(this.object);
         const geometry = this.getGeometry();
-        const material = new THREE.MeshStandardMaterial({color: this.color});
+        const materialOption = {};
+        if (this.texture.indexOf('map/') == 0) materialOption.map = textureLoader.load(this.texture);
+        else materialOption.color = this.texture;
+        const material = new THREE.MeshStandardMaterial(materialOption);
         const object = new THREE.Mesh(geometry, material);
         object.matrixAutoUpdate = false;
         this.engine.scene.add(object);
