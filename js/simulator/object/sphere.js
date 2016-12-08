@@ -1,8 +1,6 @@
 const Circle = require('./circle');
 const Controller = require('../control/controller');
 const {rad2deg, deg2rad, spherical2cartesian} = require('../util');
-const {cube} = require('../util');
-const {pow} = Math;
 
 
 class Sphere extends Circle {
@@ -34,8 +32,8 @@ class Sphere extends Circle {
         this.v = spherical2cartesian(rho, phi, theta);
     }
 
-    setup_controllers(pos_range, m, v, v_range) {
-        super.setup_controllers(pos_range, m, v, v_range);
+    setup_controllers(pos_range, m, r, v, v_range) {
+        super.setup_controllers(pos_range, m, r, v, v_range);
         this.posZController = new Controller(this, "Position z", -pos_range, pos_range, this.pos[2], this.controlPos);
         this.vThetaController = new Controller(this, "Velocity θ", -180, 180, rad2deg(v[2]), this.controlV);
     }

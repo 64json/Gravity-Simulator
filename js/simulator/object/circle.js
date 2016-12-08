@@ -2,7 +2,7 @@ const ControlBox = require('../control/control_box');
 const Controller = require('../control/controller');
 const {rad2deg, deg2rad, polar2cartesian, cartesian2auto, square} = require('../util');
 const {zeros, mag, add, sub, mul, div} = require('../matrix');
-const {max, PI} = Math;
+const {max} = Math;
 
 
 class Circle {
@@ -26,11 +26,15 @@ class Circle {
         this.path = null;
         this.pathVertices = [];
         this.pathMaterial = new THREE.LineBasicMaterial({
+            color: 0xbbbbbb
+        });
+        this.direction = null;
+        this.directionMaterial = new THREE.LineBasicMaterial({
             color: 0xffffff
         });
     }
 
-    getGeometry(){
+    getGeometry() {
         return new THREE.CircleGeometry(this.r, 32);
     }
 
@@ -70,11 +74,19 @@ class Circle {
         this.object.position.x = this.pos[0];
         this.object.position.y = this.pos[1];
         this.object.updateMatrix();
+
         if (this.path) this.engine.scene.remove(this.path);
         const pathGeometry = new THREE.Geometry();
         pathGeometry.vertices = this.pathVertices;
         this.path = new THREE.Line(pathGeometry, this.pathMaterial);
         this.engine.scene.add(this.path);
+
+        if (this.direction) this.engine.scene.remove(this.direction);
+        const directionGeometry = new THREE.Geometry();
+        const nextPos = add(this.pos, mul(this.v, 20));
+        directionGeometry.vertices = [new THREE.Vector3(this.pos[0], this.pos[1], this.pos[2]), new THREE.Vector3(nextPos[0], nextPos[1], nextPos[2])];
+        this.direction = new THREE.Line(directionGeometry, this.directionMaterial);
+        this.engine.scene.add(this.direction);
     }
 
     controlM(e) {

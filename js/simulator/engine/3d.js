@@ -2,7 +2,7 @@ const Engine2D = require('./2d');
 const Sphere = require('../object/sphere');
 const {random, getYRotationMatrix, getZRotationMatrix, randColor, spherical2cartesian, skipInvisibleError} = require('../util');
 const {mag, sub, dot} = require('../matrix');
-const {min, abs} = Math;
+const {min} = Math;
 
 
 class Engine3D extends Engine2D {
