@@ -18,6 +18,14 @@ class Engine2D {
         this.camera.position.z = 500;
         this.camera.lookAt(this.scene.position);
 
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 1);
+        this.scene.add(hemiLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.2);
+        dirLight.position.set(-1, 1, 1);
+        dirLight.position.multiplyScalar(50);
+        this.scene.add(dirLight);
+
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.15;

@@ -26,7 +26,7 @@ class Circle {
         this.path = null;
         this.pathVertices = [];
         this.pathMaterial = new THREE.LineBasicMaterial({
-            color: 0xbbbbbb
+            color: 0x888888
         });
         this.direction = null;
         this.directionMaterial = new THREE.LineBasicMaterial({
@@ -41,7 +41,7 @@ class Circle {
     createObject() {
         if (this.object) this.engine.scene.remove(this.object);
         const geometry = this.getGeometry();
-        const material = new THREE.MeshBasicMaterial({color: this.color});
+        const material = new THREE.MeshStandardMaterial({color: this.color});
         const object = new THREE.Mesh(geometry, material);
         object.matrixAutoUpdate = false;
         this.engine.scene.add(object);

@@ -2,7 +2,7 @@ const presets = require('./preset');
 const Simulator = require('./simulator');
 
 const simulator = new Simulator();
-let selected = 0;
+let selected = 1;
 simulator.init(presets[selected]);
 
 const $select = $('select');
