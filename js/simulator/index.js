@@ -57,19 +57,21 @@ class Simulator {
         $(window).resize(e => {
             onResize(e, this.engine);
         });
-        $(this.renderer.domElement).click(e => {
+        $(this.renderer.domElement).contextmenu(e => {
+            e.preventDefault();
+            this.engine.onMouseUp(e);
             onClick(e, this.engine);
         });
         $('body').keydown(e => {
             onKeyDown(e, this.engine);
         });
-        $(document).mousedown(e => {
+        $rendererWrapper.mousedown(e => {
             this.engine.onMouseDown(e);
         });
-        $(document).mousemove(e => {
+        $rendererWrapper.mousemove(e => {
             this.engine.onMouseMove(e);
         });
-        $(document).mouseup(e => {
+        $rendererWrapper.mouseup(e => {
             this.engine.onMouseUp(e);
         });
     }

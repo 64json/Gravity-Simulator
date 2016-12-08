@@ -11,8 +11,9 @@ class Sphere extends Circle {
      * https://en.wikipedia.org/wiki/Spherical_coordinate_system
      */
 
-    getRadius() {
-        return Sphere.getRadiusFromMass(this.m);
+    draw() {
+        this.object.position.z = this.pos[2];
+        super.draw();
     }
 
     controlPos(e) {
@@ -38,6 +39,7 @@ class Sphere extends Circle {
     getControllers() {
         return [
             this.mController,
+            this.rController,
             this.posXController,
             this.posYController,
             this.posZController,
@@ -45,14 +47,6 @@ class Sphere extends Circle {
             this.vPhiController,
             this.vThetaController
         ];
-    }
-
-    static getRadiusFromMass(m) {
-        return pow(m, 1 / 3);
-    }
-
-    static getMassFromRadius(r) {
-        return cube(r);
     }
 }
 

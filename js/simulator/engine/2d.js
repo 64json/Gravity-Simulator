@@ -14,8 +14,9 @@ class Engine2D {
         this.lastObjNo = 0;
         this.renderer = renderer;
         this.scene = new THREE.Scene();
-        this.camera = new THREE.OrthographicCamera(-this.config.W / 2, this.config.W / 2, -this.config.H / 2, this.config.H / 2, 1, 1000);
-        this.camera.position.z = 100;
+        this.camera = new THREE.PerspectiveCamera(45, config.W / config.H, 0.1, 1e5);
+        this.camera.position.z = 500;
+        this.camera.lookAt(this.scene.position);
 
         this.mouseDown = false;
         this.mouseX = 0;
@@ -50,7 +51,14 @@ class Engine2D {
     }
 
     userCreateObject(x, y) {
-        const pos = [(x - this.config.W / 2) / this.camera.zoom, (y - this.config.H / 2) / this.camera.zoom];
+        const vector = new THREE.Vector3();
+        vector.set((x / this.config.W) * 2 - 1, -(y / this.config.H) * 2 + 1, 0.5);
+        vector.unproject(this.camera);
+        const dir = vector.sub(this.camera.position).normalize();
+        const distance = -this.camera.position.z / dir.z;
+        const position = this.camera.position.clone().add(dir.multiplyScalar(distance));
+        const pos = [position.x, position.y];
+
         let maxR = this.config.RADIUS_MAX;
         for (const obj of this.objs) {
             maxR = min(maxR, (mag(sub(obj.pos, pos)) - obj.r) / 1.5)
@@ -139,10 +147,7 @@ class Engine2D {
     }
 
     resize() {
-        this.camera.left = -this.config.W / 2;
-        this.camera.right = this.config.W / 2;
-        this.camera.top = -this.config.H / 2;
-        this.camera.bottom = this.config.H / 2;
+        this.camera.aspect = this.config.W / this.config.H;
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(this.config.W, this.config.H);
     }
@@ -152,7 +157,7 @@ class Engine2D {
             return;
         }
 
-        var delta = atan2(e.clientY - this.config.H / 2, e.clientX - this.config.W / 2) - atan2(this.mouseY - this.config.H / 2, this.mouseX - this.config.W / 2);
+        let delta = atan2(e.pageY - this.config.H / 2, e.pageX - this.config.W / 2) - atan2(this.mouseY - this.config.H / 2, this.mouseX - this.config.W / 2);
         if (delta < -PI) delta += 2 * PI;
         if (delta > +PI) delta -= 2 * PI;
         this.mouseX = e.pageX;
@@ -183,35 +188,38 @@ class Engine2D {
         return this.config.CAMERA_COORD_STEP * pow(this.config.CAMERA_ACCELERATION, this.combo);
     }
 
-    up(key) {
-        this.camera.translateY(-this.getCoordStep(key));
+    updatePosition(){
         this.camera.updateProjectionMatrix();
     }
 
-    down(key) {
+    up(key) {
         this.camera.translateY(+this.getCoordStep(key));
-        this.camera.updateProjectionMatrix();
+        this.updatePosition();
+    }
+
+    down(key) {
+        this.camera.translateY(-this.getCoordStep(key));
+        this.updatePosition();
     }
 
     left(key) {
         this.camera.translateX(-this.getCoordStep(key));
-        this.camera.updateProjectionMatrix();
+        this.updatePosition();
     }
 
     right(key) {
         this.camera.translateX(+this.getCoordStep(key));
-        this.camera.updateProjectionMatrix();
+        this.updatePosition();
     }
 
     zoomIn(key) {
-        this.camera.zoom += this.getCoordStep(key) / 100;
-        this.camera.updateProjectionMatrix();
+        this.camera.translateZ(-this.getCoordStep(key));
+        this.updatePosition();
     }
 
     zoomOut(key) {
-        this.camera.zoom -= this.getCoordStep(key) / 100;
-        if (this.camera.zoom < 0.01)this.camera.zoom = 0.01;
-        this.camera.updateProjectionMatrix();
+        this.camera.translateZ(+this.getCoordStep(key));
+        this.updatePosition();
     }
 }
 
