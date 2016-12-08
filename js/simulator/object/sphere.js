@@ -11,6 +11,10 @@ class Sphere extends Circle {
      * https://en.wikipedia.org/wiki/Spherical_coordinate_system
      */
 
+    getGeometry(){
+        return new THREE.SphereGeometry(this.r, 32, 32);
+    }
+
     draw() {
         this.object.position.z = this.pos[2];
         super.draw();

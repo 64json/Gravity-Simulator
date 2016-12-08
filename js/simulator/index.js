@@ -4,14 +4,6 @@ const {getDistance} = require('./util');
 
 
 let config = null;
-const keymap = {
-    38: 'up',
-    40: 'down',
-    37: 'left',
-    39: 'right',
-    90: 'zoomIn', // z
-    88: 'zoomOut', // x
-};
 const $rendererWrapper = $('.renderer-wrapper');
 
 function onResize(e, engine) {
@@ -45,8 +37,6 @@ function onKeyDown(e, engine) {
     if (keyCode == 32) { // space bar
         engine.destroyControlBoxes();
         engine.toggleAnimating();
-    } else if (keyCode in keymap && keymap[keyCode] in engine) {
-        engine[keymap[keyCode]](keyCode);
     }
 }
 
@@ -57,22 +47,11 @@ class Simulator {
         $(window).resize(e => {
             onResize(e, this.engine);
         });
-        $(this.renderer.domElement).contextmenu(e => {
-            e.preventDefault();
-            this.engine.onMouseUp(e);
+        $(this.renderer.domElement).dblclick(e => {
             onClick(e, this.engine);
         });
         $('body').keydown(e => {
             onKeyDown(e, this.engine);
-        });
-        $rendererWrapper.mousedown(e => {
-            this.engine.onMouseDown(e);
-        });
-        $rendererWrapper.mousemove(e => {
-            this.engine.onMouseMove(e);
-        });
-        $rendererWrapper.mouseup(e => {
-            this.engine.onMouseUp(e);
         });
     }
 

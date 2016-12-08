@@ -8,12 +8,7 @@ const {min, abs} = Math;
 class Engine3D extends Engine2D {
     constructor(config, renderer) {
         super(config, renderer);
-
-        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
-        this.controls.enableDamping = true;
-        this.controls.dampingFactor = 0.25;
-        this.controls.enableZoom = false;
-        this.controls.enableKeys = false;
+        this.controls.enableRotate = true;
     }
 
     userCreateObject(x, y) {
@@ -39,7 +34,7 @@ class Engine3D extends Engine2D {
         this.objs.push(obj);
     }
 
-    createObject(tag, pos, r, m, v, color) {
+    createObject(tag, pos, m, r, v, color) {
         const obj = new Sphere(this.config, m, r, pos, v, color, tag, this);
         this.objs.push(obj);
     }
@@ -63,8 +58,6 @@ class Engine3D extends Engine2D {
 
     updatePosition() {
         super.updatePosition();
-        this.controls.position0 = this.camera.position.clone();
-        this.controls.reset();
     }
 }
 

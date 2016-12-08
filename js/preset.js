@@ -16,10 +16,7 @@ function EMPTY_2D(c) {
         RADIUS_MAX: 2e2,
         VELOCITY_MAX: 10,
         DIRECTION_LENGTH: 50,
-        CAMERA_X: 0,
-        CAMERA_Y: 0,
-        CAMERA_Z: 200,
-        FOCAL_LENGTH: 100,
+        CAMERA_DISTANCE: 100,
         INPUT_TYPE: 'range'
     });
 }
@@ -32,34 +29,50 @@ function EMPTY_3D(c) {
         G: 0.001,
         MASS_MIN: 1,
         MASS_MAX: 8e6,
+        RADIUS_MIN: 1,
+        RADIUS_MAX: 2e2,
         VELOCITY_MAX: 10
     });
 }
 EMPTY_3D.prototype.title = '3D Gravity Simulator';
 
-function WOO_2D(c) {
+function MANUAL_2D(c) {
     return extend(true, EMPTY_2D(c), {
         INPUT_TYPE: 'number'
     });
 }
-WOO_2D.prototype.title = '2D WOO';
+MANUAL_2D.prototype.title = '2D Manual';
 
-function WOO_3D(c) {
+function MANUAL_3D(c) {
     return extend(true, EMPTY_3D(c), {
         INPUT_TYPE: 'number'
     });
 }
-WOO_3D.prototype.title = '3D WOO';
+MANUAL_3D.prototype.title = '3D Manual';
 
-function DEBUG(c) {
+function ORBITING(c) {
     return extend(true, EMPTY_3D(c), {
         init: (engine) => {
-            engine.createObject('ball1', [-150, 0, 0], 1000000, 100, [0, 0, 0], 'green');
-            engine.createObject('ball2', [50, 0, 0], 10000, 10, [0, 0, 0], 'blue');
+            engine.createObject('Sun', [0, 0, 0], 1000000, 100, [0, 0, 0], 'blue');
+            engine.createObject('Mercury', [180, 0, 0], 1, 20, [0, 2.4, 0], 'red');
+            engine.createObject('Venus', [240, 0, 0], 1, 20, [0, 2.1, 0], 'yellow');
+            engine.createObject('Earth', [300, 0, 0], 1, 20, [0, 1.9, 0], 'green');
             engine.toggleAnimating();
         }
     });
 }
-DEBUG.prototype.title = 'DEBUG';
+ORBITING.prototype.title = 'Orbiting';
 
-module.exports = [EMPTY_2D, EMPTY_3D, WOO_2D, WOO_3D, DEBUG];
+function COLLISION(c) {
+    return extend(true, EMPTY_3D(c), {
+        init: (engine) => {
+            engine.createObject('Ball A', [-100, 0, 0], 100000, 50, [.5, .5, 0], 'blue');
+            engine.createObject('Ball B', [100, 0, 0], 100000, 50, [-.5, -.5, 0], 'red');
+            engine.createObject('Ball C', [0, 100, 0], 100000, 50, [0, 0, 0], 'green');
+            engine.toggleAnimating();
+        }
+    });
+}
+COLLISION.prototype.title = 'Elastic Collision';
+
+module.exports = [EMPTY_2D, EMPTY_3D, MANUAL_2D, MANUAL_3D, ORBITING, COLLISION];

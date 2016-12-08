@@ -18,9 +18,10 @@ class Engine2D {
         this.camera.position.z = 500;
         this.camera.lookAt(this.scene.position);
 
-        this.mouseDown = false;
-        this.mouseX = 0;
-        this.mouseY = 0;
+        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true;
+        this.controls.dampingFactor = 0.15;
+        this.controls.enableRotate = false;
     }
 
     toggleAnimating() {
@@ -132,6 +133,7 @@ class Engine2D {
         for (const obj of this.objs) {
             obj.draw();
         }
+        this.controls.update();
         this.renderer.render(this.scene, this.camera);
     }
 
@@ -166,16 +168,6 @@ class Engine2D {
         this.camera.updateProjectionMatrix();
     }
 
-    onMouseDown(e) {
-        this.mouseDown = true;
-        this.mouseX = e.pageX;
-        this.mouseY = e.pageY;
-    }
-
-    onMouseUp(e) {
-        this.mouseDown = false;
-    }
-
     getCoordStep(key) {
         const currentTime = now();
         if (key == this.lastKey && currentTime - this.lastTime < 1) {
@@ -186,40 +178,6 @@ class Engine2D {
         this.lastTime = currentTime;
         this.lastKey = key;
         return this.config.CAMERA_COORD_STEP * pow(this.config.CAMERA_ACCELERATION, this.combo);
-    }
-
-    updatePosition(){
-        this.camera.updateProjectionMatrix();
-    }
-
-    up(key) {
-        this.camera.translateY(+this.getCoordStep(key));
-        this.updatePosition();
-    }
-
-    down(key) {
-        this.camera.translateY(-this.getCoordStep(key));
-        this.updatePosition();
-    }
-
-    left(key) {
-        this.camera.translateX(-this.getCoordStep(key));
-        this.updatePosition();
-    }
-
-    right(key) {
-        this.camera.translateX(+this.getCoordStep(key));
-        this.updatePosition();
-    }
-
-    zoomIn(key) {
-        this.camera.translateZ(-this.getCoordStep(key));
-        this.updatePosition();
-    }
-
-    zoomOut(key) {
-        this.camera.translateZ(+this.getCoordStep(key));
-        this.updatePosition();
     }
 }
 

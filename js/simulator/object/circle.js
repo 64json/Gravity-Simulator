@@ -30,9 +30,13 @@ class Circle {
         });
     }
 
+    getGeometry(){
+        return new THREE.CircleGeometry(this.r, 32);
+    }
+
     createObject() {
         if (this.object) this.engine.scene.remove(this.object);
-        const geometry = new THREE.SphereGeometry(this.r, 32, 32);
+        const geometry = this.getGeometry();
         const material = new THREE.MeshBasicMaterial({color: this.color});
         const object = new THREE.Mesh(geometry, material);
         object.matrixAutoUpdate = false;
