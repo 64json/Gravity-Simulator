@@ -54,10 +54,10 @@ MANUAL_3D.prototype.title = '3D Manual';
 function ORBITING(c) {
     return extend(true, EMPTY_3D(c), {
         init: (engine) => {
-            engine.createObject('Sun', [0, 0, 0], 1000000, 100, [0, 0, 0], 'blue');
-            engine.createObject('Mercury', [180, 0, 0], 1, 20, [0, 2.4, 0], 'red');
-            engine.createObject('Venus', [240, 0, 0], 1, 20, [0, 2.1, 0], 'yellow');
-            engine.createObject('Earth', [300, 0, 0], 1, 20, [0, 1.9, 0], 'green');
+            engine.createObject('Ball A', [0, 0, 0], 1000000, 100, [0, 0, 0], 'blue');
+            engine.createObject('Ball B', [180, 0, 0], 1, 20, [0, 2.4, 0], 'red');
+            engine.createObject('Ball C', [240, 0, 0], 1, 20, [0, 2.1, 0], 'yellow');
+            engine.createObject('Ball D', [300, 0, 0], 1, 20, [0, 1.9, 0], 'green');
             engine.toggleAnimating();
         }
     });
