@@ -71,6 +71,7 @@ class Circle {
         if (mag(sub(this.pos, this.prevPos)) > 1) {
             this.prevPos = this.pos.slice();
             this.pathVertices.push(new THREE.Vector3(this.pos[0], this.pos[1], this.pos[2]));
+            if (this.pathVertices.length > 100000) this.pathVertices.shift();
         }
     }
 

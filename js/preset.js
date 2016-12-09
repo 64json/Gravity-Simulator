@@ -102,6 +102,11 @@ function SOLAR_SYSTEM(c) {
             engine.createObject('Saturn', [1433.5, 0, 0], 95.162, k_r(58232), [0, 9.7 * k_v, 0], 'map/solar_system/saturn.jpg');
             engine.createObject('Uranus', [2872.5, 0, 0], 14.536, k_r(25362), [0, 6.8 * k_v, 0], 'map/solar_system/uranus.jpg');
             engine.createObject('Neptune', [4495.1, 0, 0], 17.147, k_r(24622), [0, 5.4 * k_v, 0], 'map/solar_system/neptune.jpg');
+
+            const light = new THREE.PointLight(0xffffff, .8, 0);
+            light.position.set(0, 0, 0);
+            engine.scene.add(light);
+
             engine.toggleAnimating();
         }
     });
