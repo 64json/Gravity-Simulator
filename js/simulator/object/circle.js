@@ -43,7 +43,7 @@ class Circle {
         if (this.object) this.engine.scene.remove(this.object);
         const geometry = this.getGeometry();
         const materialOption = {};
-        if (this.texture.indexOf('map/') == 0) materialOption.map = textureLoader.load(this.texture);
+        if (typeof this.texture === 'string' && this.texture.indexOf('map/') == 0) materialOption.map = textureLoader.load(this.texture);
         else materialOption.color = this.texture;
         const material = new THREE.MeshStandardMaterial(materialOption);
         const object = new THREE.Mesh(geometry, material);
@@ -90,8 +90,9 @@ class Circle {
         if (mag(this.v) == 0) {
             this.direction = null;
         } else {
-            const nextPos = add(this.pos, mul(this.v, this.r / mag(this.v) + 20));
-            directionGeometry.vertices = [new THREE.Vector3(this.pos[0], this.pos[1], this.pos[2]), new THREE.Vector3(nextPos[0], nextPos[1], nextPos[2])];
+            const sPos = add(this.pos, mul(this.v, this.r / mag(this.v)));
+            const ePos = add(sPos, mul(this.v, 20));
+            directionGeometry.vertices = [new THREE.Vector3(sPos[0], sPos[1], sPos[2]), new THREE.Vector3(ePos[0], ePos[1], ePos[2])];
             this.direction = new THREE.Line(directionGeometry, this.directionMaterial);
             this.engine.scene.add(this.direction);
         }

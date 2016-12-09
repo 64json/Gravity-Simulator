@@ -34,8 +34,8 @@ class Engine3D extends Engine2D {
         this.objs.push(obj);
     }
 
-    createObject(tag, pos, m, r, v, color) {
-        const obj = new Sphere(this.config, m, r, pos, v, color, tag, this);
+    createObject(tag, pos, m, r, v, texture) {
+        const obj = new Sphere(this.config, m, r, pos, v, texture, tag, this);
         this.objs.push(obj);
     }
 

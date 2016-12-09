@@ -17,7 +17,8 @@ function EMPTY_2D(c) {
         VELOCITY_MAX: 10,
         DIRECTION_LENGTH: 50,
         CAMERA_DISTANCE: 100,
-        INPUT_TYPE: 'range'
+        INPUT_TYPE: 'range',
+        CAMERA_POSITION: [0, 0, 500]
     });
 }
 EMPTY_2D.prototype.title = '2D Gravity Simulator';
@@ -76,11 +77,31 @@ function COLLISION(c) {
 COLLISION.prototype.title = 'Elastic Collision';
 
 function SOLAR_SYSTEM(c) {
+    const k_v = 5e-2;
+    const k_r = (r) => {
+        return Math.pow(Math.log(r), 3) * 1e-2;
+    };
     return extend(true, MANUAL_3D(c), {
-        G: 0.00266418,
+        G: 398682.84288e-6 * Math.pow(k_v, 2),
+        CAMERA_POSITION: [0, 0, 5e2],
+        /**
+         * Length: km
+         * Mass: earth mass
+         *
+         * https://en.wikipedia.org/wiki/List_of_Solar_System_objects_by_size
+         * http://nssdc.gsfc.nasa.gov/planetary/factsheet/
+         */
+
         init: (engine) => {
-            engine.createObject('Sun', [0, 0, 0], 1000000, 100, [0, 0, 0], 'map/solar_system/sun.jpg');
-            engine.createObject('Mercury', [200, 0, 0], 1000000, 100, [0, 0, 0], 'map/solar_system/mercury.png');
+            engine.createObject('Sun', [0, 0, 0], 333000, k_r(696342), [0, 0, 0], 'map/solar_system/sun.jpg');
+            engine.createObject('Mercury', [57.9, 0, 0], 0.0553, k_r(2439.7), [0, 47.4 * k_v, 0], 'map/solar_system/mercury.png');
+            engine.createObject('Venus', [108.2, 0, 0], 0.815, k_r(6051.8), [0, 35.0 * k_v, 0], 'map/solar_system/venus.jpg');
+            engine.createObject('Earth', [149.6, 0, 0], 1, k_r(6371.0), [0, 29.8 * k_v, 0], 'map/solar_system/earth.jpg');
+            engine.createObject('Mars', [227.9, 0, 0], 0.107, k_r(3389.5), [0, 24.1 * k_v, 0], 'map/solar_system/mars.jpg');
+            engine.createObject('Jupiter', [778.6, 0, 0], 317.83, k_r(69911), [0, 13.1 * k_v, 0], 'map/solar_system/jupiter.jpg');
+            engine.createObject('Saturn', [1433.5, 0, 0], 95.162, k_r(58232), [0, 9.7 * k_v, 0], 'map/solar_system/saturn.jpg');
+            engine.createObject('Uranus', [2872.5, 0, 0], 14.536, k_r(25362), [0, 6.8 * k_v, 0], 'map/solar_system/uranus.jpg');
+            engine.createObject('Neptune', [4495.1, 0, 0], 17.147, k_r(24622), [0, 5.4 * k_v, 0], 'map/solar_system/neptune.jpg');
             engine.toggleAnimating();
         }
     });

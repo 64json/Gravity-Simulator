@@ -14,8 +14,10 @@ class Engine2D {
         this.lastObjNo = 0;
         this.renderer = renderer;
         this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(45, config.W / config.H, 0.1, 1e5);
-        this.camera.position.z = 500;
+        this.camera = new THREE.PerspectiveCamera(45, config.W / config.H, 1e-3, 1e5);
+        this.camera.position.x = config.CAMERA_POSITION[0];
+        this.camera.position.y = config.CAMERA_POSITION[1];
+        this.camera.position.z = config.CAMERA_POSITION[2];
         this.camera.lookAt(this.scene.position);
 
         const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 1);
@@ -28,7 +30,7 @@ class Engine2D {
 
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
-        this.controls.dampingFactor = 0.15;
+        this.controls.dampingFactor = 0.2;
         this.controls.enableRotate = false;
     }
 
@@ -82,8 +84,8 @@ class Engine2D {
         this.objs.push(obj);
     }
 
-    createObject(tag, pos, m, r, v, color) {
-        const obj = new Circle(this.config, m, r, pos, v, color, tag, this);
+    createObject(tag, pos, m, r, v, texture) {
+        const obj = new Circle(this.config, m, r, pos, v, texture, tag, this);
         this.objs.push(obj);
     }
 
