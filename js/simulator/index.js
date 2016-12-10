@@ -1,6 +1,5 @@
 const Engine2D = require('./engine/2d');
 const Engine3D = require('./engine/3d');
-const {getDistance} = require('./util');
 
 
 let config = null;
@@ -51,6 +50,7 @@ class Simulator {
             onClick(e, this.engine);
         });
         $('body').keydown(e => {
+            e.preventDefault();
             onKeyDown(e, this.engine);
         });
     }

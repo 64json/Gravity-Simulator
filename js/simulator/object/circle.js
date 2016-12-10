@@ -1,7 +1,7 @@
 const ControlBox = require('../control/control_box');
 const Controller = require('../control/controller');
-const {rad2deg, deg2rad, polar2cartesian, cartesian2auto, square} = require('../util');
-const {zeros, mag, add, sub, mul, div} = require('../matrix');
+const {rad2deg, deg2rad, polar2cartesian, cartesian2auto, square, rotate, getRotationMatrix} = require('../util');
+const {zeros, mag, add, sub, mul, div, to3} = require('../matrix');
 const {max} = Math;
 const textureLoader = new THREE.TextureLoader();
 
@@ -22,7 +22,7 @@ class Circle {
         this.texture = texture;
         this.tag = tag;
         this.engine = engine;
-        this.object = this.createObject();
+        this.object = this.createThreeObject();
         this.controlBox = null;
         this.path = null;
         this.pathVertices = [];
@@ -35,13 +35,13 @@ class Circle {
         });
     }
 
-    getGeometry() {
+    getThreeGeometry() {
         return new THREE.CircleGeometry(this.r, 32);
     }
 
-    createObject() {
+    createThreeObject() {
         if (this.object) this.engine.scene.remove(this.object);
-        const geometry = this.getGeometry();
+        const geometry = this.getThreeGeometry();
         const materialOption = {};
         if (typeof this.texture === 'string' && this.texture.indexOf('map/') == 0) materialOption.map = textureLoader.load(this.texture);
         else materialOption.color = this.texture;
@@ -70,8 +70,42 @@ class Circle {
         this.pos = add(this.pos, this.v);
         if (mag(sub(this.pos, this.prevPos)) > 1) {
             this.prevPos = this.pos.slice();
-            this.pathVertices.push(new THREE.Vector3(this.pos[0], this.pos[1], this.pos[2]));
-            if (this.pathVertices.length > 100000) this.pathVertices.shift();
+            this.pathVertices.push(to3(this.pos));
+            if (this.pathVertices.length > this.config.MAX_PATHS) this.pathVertices.shift();
+        }
+    }
+
+    getRotationMatrix(angles, dir = 1) {
+        return getRotationMatrix(angles[0], dir);
+    }
+
+    getPivotAxis() {
+        return 0;
+    }
+
+    calculateCollision(o){
+        const dimension = this.config.DIMENSION;
+        const collision = sub(o.pos, this.pos);
+        const angles = cartesian2auto(collision);
+        const d = angles.shift();
+
+        if (d < this.r + o.r) {
+            const R = this.getRotationMatrix(angles);
+            const R_ = this.getRotationMatrix(angles, -1);
+            const i = this.getPivotAxis();
+
+            const vTemp = [rotate(this.v, R), rotate(o.v, R)];
+            const vFinal = [vTemp[0].slice(), vTemp[1].slice()];
+            vFinal[0][i] = ((this.m - o.m) * vTemp[0][i] + 2 * o.m * vTemp[1][i]) / (this.m + o.m);
+            vFinal[1][i] = ((o.m - this.m) * vTemp[1][i] + 2 * this.m * vTemp[0][i]) / (this.m + o.m);
+            this.v = rotate(vFinal[0], R_);
+            o.v = rotate(vFinal[1], R_);
+
+            const posTemp = [zeros(dimension), rotate(collision, R)];
+            posTemp[0][i] += vFinal[0][i];
+            posTemp[1][i] += vFinal[1][i];
+            this.pos = add(this.pos, rotate(posTemp[0], R_));
+            o.pos = add(this.pos, rotate(posTemp[1], R_));
         }
     }
 
@@ -92,8 +126,8 @@ class Circle {
             this.direction = null;
         } else {
             const sPos = add(this.pos, mul(this.v, this.r / mag(this.v)));
-            const ePos = add(sPos, mul(this.v, 20));
-            directionGeometry.vertices = [new THREE.Vector3(sPos[0], sPos[1], sPos[2]), new THREE.Vector3(ePos[0], ePos[1], ePos[2])];
+            const ePos = add(sPos, mul(this.v, this.config.DIRECTION_LENGTH));
+            directionGeometry.vertices = [to3(sPos), to3(ePos)];
             this.direction = new THREE.Line(directionGeometry, this.directionMaterial);
             this.engine.scene.add(this.direction);
         }
@@ -102,13 +136,13 @@ class Circle {
     controlM(e) {
         const m = this.mController.get();
         this.m = m;
-        this.object = this.createObject();
+        this.object = this.createThreeObject();
     }
 
     controlR(e) {
         const r = this.rController.get();
         this.r = r;
-        this.object = this.createObject();
+        this.object = this.createThreeObject();
     }
 
     controlPos(e) {

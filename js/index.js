@@ -14,9 +14,6 @@ $select.change(() => {
     selected = parseInt($select.find(':selected').val());
     simulator.init(presets[selected]);
 });
-$select.focus(() => {
-    $select.blur();
-});
 $('#reset').click(() => {
     simulator.init(presets[selected]);
 });

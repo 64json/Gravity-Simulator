@@ -1,7 +1,8 @@
 const Circle = require('../object/circle');
-const {rotate, now, random, polar2cartesian, randColor, getRotationMatrix, cartesian2auto} = require('../util');
-const {zeros, mag, add, sub} = require('../matrix');
-const {min, PI, atan2, pow} = Math;
+const {now, random, polar2cartesian, randColor} = require('../util');
+const {mag, sub} = require('../matrix');
+const $fps = $('#fps');
+const {min, PI, atan2} = Math;
 
 class Engine2D {
     constructor(config, renderer) {
@@ -14,6 +15,7 @@ class Engine2D {
         this.lastObjNo = 0;
         this.renderer = renderer;
         this.scene = new THREE.Scene();
+        this.scene.background = new THREE.Color(config.BACKGROUND);
         this.camera = new THREE.PerspectiveCamera(45, config.W / config.H, 1e-3, 1e5);
         this.camera.position.x = config.CAMERA_POSITION[0];
         this.camera.position.y = config.CAMERA_POSITION[1];
@@ -32,23 +34,28 @@ class Engine2D {
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.2;
         this.controls.enableRotate = false;
+
+        const $gravity_input = $('#gravity_input');
+        const $gravity_value = $('#gravity_value');
+        $gravity_input.attr('type', config.INPUT_TYPE);
+        $gravity_input.attr('min', config.G_MIN);
+        $gravity_input.attr('max', config.G_MAX);
+        $gravity_input.val(config.G);
+        $gravity_input.attr('step', 0.0001);
+        $gravity_value.text(config.G);
+        $('#gravity_change').click(() => {
+            const gravity = parseFloat($gravity_input.val());
+            config.G = gravity;
+        });
+        $gravity_input.on('input', e => {
+            const gravity = parseFloat($gravity_input.val());
+            $gravity_value.text(gravity);
+        });
     }
 
     toggleAnimating() {
         this.animating = !this.animating;
         document.title = `${this.config.TITLE} (${this.animating ? "Simulating" : "Paused"})`;
-    }
-
-    destroyControlBoxes() {
-        for (const controlBox of this.controlBoxes) {
-            controlBox.close();
-        }
-        this.controlBoxes = []
-    }
-
-    destroy() {
-        this.renderer = null;
-        this.destroyControlBoxes();
     }
 
     animate() {
@@ -89,51 +96,17 @@ class Engine2D {
         this.objs.push(obj);
     }
 
-    getRotationMatrix(angles, dir = 1) {
-        return getRotationMatrix(angles[0], dir);
-    }
-
-    getPivotAxis() {
-        return 0;
-    }
-
-    collideElastically() {
-        const dimension = this.config.DIMENSION;
-        for (let i = 0; i < this.objs.length; i++) {
-            const o1 = this.objs[i];
-            for (let j = i + 1; j < this.objs.length; j++) {
-                const o2 = this.objs[j];
-                const collision = sub(o2.pos, o1.pos);
-                const angles = cartesian2auto(collision);
-                const d = angles.shift();
-
-                if (d < o1.r + o2.r) {
-                    const R = this.getRotationMatrix(angles);
-                    const R_ = this.getRotationMatrix(angles, -1);
-                    const i = this.getPivotAxis();
-
-                    const vTemp = [rotate(o1.v, R), rotate(o2.v, R)];
-                    const vFinal = [vTemp[0].slice(), vTemp[1].slice()];
-                    vFinal[0][i] = ((o1.m - o2.m) * vTemp[0][i] + 2 * o2.m * vTemp[1][i]) / (o1.m + o2.m);
-                    vFinal[1][i] = ((o2.m - o1.m) * vTemp[1][i] + 2 * o1.m * vTemp[0][i]) / (o1.m + o2.m);
-                    o1.v = rotate(vFinal[0], R_);
-                    o2.v = rotate(vFinal[1], R_);
-
-                    const posTemp = [zeros(dimension), rotate(collision, R)];
-                    posTemp[0][i] += vFinal[0][i];
-                    posTemp[1][i] += vFinal[1][i];
-                    o1.pos = add(o1.pos, rotate(posTemp[0], R_));
-                    o2.pos = add(o1.pos, rotate(posTemp[1], R_));
-                }
-            }
-        }
-    }
-
     calculateAll() {
         for (const obj of this.objs) {
             obj.calculateVelocity();
         }
-        this.collideElastically();
+        for (let i = 0; i < this.objs.length; i++) {
+            const o1 = this.objs[i];
+            for (let j = i + 1; j < this.objs.length; j++) {
+                const o2 = this.objs[j];
+                o1.calculateCollision(o2);
+            }
+        }
         for (const obj of this.objs) {
             obj.calculatePosition();
         }
@@ -152,7 +125,7 @@ class Engine2D {
         const currentTime = now();
         const timeDiff = currentTime - this.fpsLastTime;
         if (timeDiff > 1) {
-            console.log(`${(this.fpsCount / timeDiff) | 0} fps`);
+            $fps.text(`${(this.fpsCount / timeDiff) | 0} fps`);
             this.fpsLastTime = currentTime;
             this.fpsCount = 0;
         }
@@ -178,16 +151,16 @@ class Engine2D {
         this.camera.updateProjectionMatrix();
     }
 
-    getCoordStep(key) {
-        const currentTime = now();
-        if (key == this.lastKey && currentTime - this.lastTime < 1) {
-            this.combo += 1;
-        } else {
-            this.combo = 0;
+    destroyControlBoxes() {
+        for (const controlBox of this.controlBoxes) {
+            controlBox.close();
         }
-        this.lastTime = currentTime;
-        this.lastKey = key;
-        return this.config.CAMERA_COORD_STEP * pow(this.config.CAMERA_ACCELERATION, this.combo);
+        this.controlBoxes = []
+    }
+
+    destroy() {
+        this.renderer = null;
+        this.destroyControlBoxes();
     }
 }
 

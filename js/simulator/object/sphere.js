@@ -1,6 +1,7 @@
 const Circle = require('./circle');
 const Controller = require('../control/controller');
-const {rad2deg, deg2rad, spherical2cartesian} = require('../util');
+const {rad2deg, deg2rad, spherical2cartesian, getYRotationMatrix, getZRotationMatrix} = require('../util');
+const {dot} = require('../matrix');
 
 
 class Sphere extends Circle {
@@ -9,8 +10,16 @@ class Sphere extends Circle {
      * https://en.wikipedia.org/wiki/Spherical_coordinate_system
      */
 
-    getGeometry(){
+    getThreeGeometry(){
         return new THREE.SphereGeometry(this.r, 32, 32);
+    }
+
+    getRotationMatrix(angles, dir = 1) {
+        return dot(getZRotationMatrix(angles[0], dir), getYRotationMatrix(angles[1], dir), dir);
+    }
+
+    getPivotAxis() {
+        return 2;
     }
 
     draw() {

@@ -1,6 +1,6 @@
 const Engine2D = require('./2d');
 const Sphere = require('../object/sphere');
-const {random, getYRotationMatrix, getZRotationMatrix, randColor, spherical2cartesian, skipInvisibleError} = require('../util');
+const {random, randColor, spherical2cartesian} = require('../util');
 const {mag, sub, dot} = require('../matrix');
 const {min} = Math;
 
@@ -37,14 +37,6 @@ class Engine3D extends Engine2D {
     createObject(tag, pos, m, r, v, texture) {
         const obj = new Sphere(this.config, m, r, pos, v, texture, tag, this);
         this.objs.push(obj);
-    }
-
-    getRotationMatrix(angles, dir = 1) {
-        return dot(getZRotationMatrix(angles[0], dir), getYRotationMatrix(angles[1], dir), dir);
-    }
-
-    getPivotAxis() {
-        return 2;
     }
 
     onMouseMove(e) {

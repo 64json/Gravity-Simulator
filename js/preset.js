@@ -3,22 +3,20 @@ const {extend} = $;
 
 function EMPTY_2D(c) {
     return extend(true, c, {
-        BACKGROUND: 'white',
+        BACKGROUND: 'black',
         DIMENSION: 2,
-        MAX_PATHS: 1000,
-        CAMERA_COORD_STEP: 5,
-        CAMERA_ANGLE_STEP: 1,
-        CAMERA_ACCELERATION: 1.1,
+        MAX_PATHS: 1e5,
         G: 0.1,
+        G_MIN: 0.0001,
+        G_MAX: 1,
         MASS_MIN: 1,
         MASS_MAX: 4e4,
         RADIUS_MIN: 1,
         RADIUS_MAX: 2e2,
         VELOCITY_MAX: 10,
-        DIRECTION_LENGTH: 50,
-        CAMERA_DISTANCE: 100,
-        INPUT_TYPE: 'range',
-        CAMERA_POSITION: [0, 0, 500]
+        DIRECTION_LENGTH: 20,
+        CAMERA_POSITION: [0, 0, 500],
+        INPUT_TYPE: 'range'
     });
 }
 EMPTY_2D.prototype.title = '2D Gravity Simulator';
@@ -82,7 +80,7 @@ function SOLAR_SYSTEM(c) {
         return Math.pow(Math.log(r), 3) * 1e-2;
     };
     return extend(true, MANUAL_3D(c), {
-        G: 398682.84288e-6 * Math.pow(k_v, 2),
+        G: 398682e-6 * Math.pow(k_v, 2),
         CAMERA_POSITION: [0, 0, 5e2],
         /**
          * Length: km
@@ -91,7 +89,6 @@ function SOLAR_SYSTEM(c) {
          * https://en.wikipedia.org/wiki/List_of_Solar_System_objects_by_size
          * http://nssdc.gsfc.nasa.gov/planetary/factsheet/
          */
-
         init: (engine) => {
             engine.createObject('Sun', [0, 0, 0], 333000, k_r(696342), [0, 0, 0], 'map/solar_system/sun.jpg');
             engine.createObject('Mercury', [57.9, 0, 0], 0.0553, k_r(2439.7), [0, 47.4 * k_v, 0], 'map/solar_system/mercury.png');

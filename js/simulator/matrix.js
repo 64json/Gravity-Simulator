@@ -63,5 +63,9 @@ module.exports = {
             }
         }
         return m;
+    },
+
+    to3: a => {
+        return new THREE.Vector3(a[0], a[1], a[2]);
     }
 };
