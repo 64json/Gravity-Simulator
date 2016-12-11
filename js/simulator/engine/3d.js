@@ -8,6 +8,15 @@ const {min} = Math;
 class Engine3D extends Engine2D {
     constructor(config, renderer) {
         super(config, renderer);
+
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 1);
+        this.scene.add(hemiLight);
+
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.2);
+        dirLight.position.set(-1, 1, 1);
+        dirLight.position.multiplyScalar(50);
+        this.scene.add(dirLight);
+
         this.controls.enableRotate = true;
     }
 
@@ -37,15 +46,6 @@ class Engine3D extends Engine2D {
     createObject(tag, pos, m, r, v, texture) {
         const obj = new Sphere(this.config, m, r, pos, v, texture, tag, this);
         this.objs.push(obj);
-    }
-
-    onMouseMove(e) {
-    }
-
-    onMouseDown(e) {
-    }
-
-    onMouseUp(e) {
     }
 
     updatePosition() {

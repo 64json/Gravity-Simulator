@@ -39,13 +39,22 @@ class Circle {
         return new THREE.CircleGeometry(this.r, 32);
     }
 
-    createThreeObject() {
-        if (this.object) this.engine.scene.remove(this.object);
-        const geometry = this.getThreeGeometry();
+    getThreeMaterialOption() {
         const materialOption = {};
         if (typeof this.texture === 'string' && this.texture.indexOf('map/') == 0) materialOption.map = textureLoader.load(this.texture);
         else materialOption.color = this.texture;
-        const material = new THREE.MeshStandardMaterial(materialOption);
+        return materialOption;
+    }
+
+    getThreeMaterial() {
+        const materialOption = this.getThreeMaterialOption();
+        return new THREE.MeshBasicMaterial(materialOption);
+    }
+
+    createThreeObject() {
+        if (this.object) this.engine.scene.remove(this.object);
+        const geometry = this.getThreeGeometry();
+        const material = this.getThreeMaterial();
         const object = new THREE.Mesh(geometry, material);
         object.matrixAutoUpdate = false;
         this.engine.scene.add(object);
@@ -83,7 +92,7 @@ class Circle {
         return 0;
     }
 
-    calculateCollision(o){
+    calculateCollision(o) {
         const dimension = this.config.DIMENSION;
         const collision = sub(o.pos, this.pos);
         const angles = cartesian2auto(collision);

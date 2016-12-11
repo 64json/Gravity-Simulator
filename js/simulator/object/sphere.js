@@ -14,6 +14,11 @@ class Sphere extends Circle {
         return new THREE.SphereGeometry(this.r, 32, 32);
     }
 
+    getThreeMaterial() {
+        const materialOption = this.getThreeMaterialOption();
+        return new THREE.MeshStandardMaterial(materialOption);
+    }
+
     getRotationMatrix(angles, dir = 1) {
         return dot(getZRotationMatrix(angles[0], dir), getYRotationMatrix(angles[1], dir), dir);
     }

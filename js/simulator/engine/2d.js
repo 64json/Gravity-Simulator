@@ -22,14 +22,6 @@ class Engine2D {
         this.camera.position.z = config.CAMERA_POSITION[2];
         this.camera.lookAt(this.scene.position);
 
-        const hemiLight = new THREE.HemisphereLight(0xffffff, 0xffffff, 1);
-        this.scene.add(hemiLight);
-
-        const dirLight = new THREE.DirectionalLight(0xffffff, 0.2);
-        dirLight.position.set(-1, 1, 1);
-        dirLight.position.multiplyScalar(50);
-        this.scene.add(dirLight);
-
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.2;
@@ -137,20 +129,6 @@ class Engine2D {
         this.renderer.setSize(this.config.W, this.config.H);
     }
 
-    onMouseMove(e) {
-        if (!this.mouseDown) {
-            return;
-        }
-
-        let delta = atan2(e.pageY - this.config.H / 2, e.pageX - this.config.W / 2) - atan2(this.mouseY - this.config.H / 2, this.mouseX - this.config.W / 2);
-        if (delta < -PI) delta += 2 * PI;
-        if (delta > +PI) delta -= 2 * PI;
-        this.mouseX = e.pageX;
-        this.mouseY = e.pageY;
-        this.camera.rotation.z += delta;
-        this.camera.updateProjectionMatrix();
-    }
-
     destroyControlBoxes() {
         for (const controlBox of this.controlBoxes) {
             controlBox.close();
@@ -161,6 +139,7 @@ class Engine2D {
     destroy() {
         this.renderer = null;
         this.destroyControlBoxes();
+        this.controls.dispose();
     }
 }
 
