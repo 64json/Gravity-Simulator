@@ -59,7 +59,7 @@ class Circle {
             const vector = sub(this.pos, obj.pos);
             const magnitude = mag(vector);
             const unitVector = div(vector, magnitude);
-            F = add(F, mul(unitVector, obj.m / square(magnitude)))
+            F = add(F, mul(unitVector, obj.m / square(magnitude)));
         }
         F = mul(F, -this.config.G * this.m);
         const a = div(F, this.m);
